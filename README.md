@@ -1,90 +1,160 @@
-<div align="center">
+# Vantage AI
 
-# 💎 Vantage AI
-### Enterprise AI Cost Observability & Governance Platform
+### Enterprise-Grade Observability, Telemetry, and Spend Governance for AI APIs
 
-[![Build Status](https://img.shields.io/badge/status-active-success.svg?style=flat-square)](#)
-[![Firebase Deploy](https://img.shields.io/badge/hosting-live-blue.svg?style=flat-square&logo=firebase)](https://vantage-ai-eda2c.web.app)
-[![Tech Stack](https://img.shields.io/badge/stack-HTML%20%7C%20CSS%20%7C%20JS-purple.svg?style=flat-square)](#)
+Vantage AI provides centralized visibility and governance for team-wide artificial intelligence API consumption. Built as a self-contained Single-Page Application (SPA) with Firebase Integration and WebGL-accelerated 3D background telemetry, Vantage AI translates raw token metrics into real-time spend analytics, budget alerts, and active seat monitoring.
 
----
-
-**Vantage AI** is a premium, high-fidelity spend governance portal designed for engineering, marketing, and data teams. Track model tokens, configure strict budget warning/hard limits, and analyze real-time usage metrics in one interactive dashboard.
-
-[**Explore Live Application ➔**](https://vantage-ai-eda2c.web.app)
-
-</div>
+[**Explore Live Application**](https://vantage-ai-eda2c.web.app) | [**View Documentation**](#system-architecture)
 
 ---
 
-## ⚡ Core Capabilities
+## Technical Overview
 
-- 🤖 **Interactive WebGL Background** — Immersive 3D Spline Nexbot Robot rendering with optimized touch and scroll physics.
-- ⏱️ **Real-Time Telemetry Stream** — Immediate per-second tracking of prompt/completion tokens.
-- 🛡️ **Budget Guardrails** — Automated soft (80%) and hard (100%) limits per department.
-- 📡 **Multi-Provider Support** — Consolidated observability for OpenAI, Gemini, Anthropic Claude, ElevenLabs, Meta Llama, and Cohere.
-- 📋 **On-the-fly CSV Export** — Client-side compilation and download of employee/provider auditing logs.
-- 🔒 **Firebase Authentication** — Strict Google Sign-in flow verification locking the app state until authenticated.
+Modern development teams experience rapid cost inflation due to unmonitored LLM token utilization, redundant API keys, and unmanaged agent feedback loops. Vantage AI solves this by introducing a client-side governance dashboard that consumes, formats, and displays telemetry logs from major providers.
+
+### Core Capabilities
+
+- **Zero-Lag WebGL Background** - Optimized 3D Spline character concept running within an isolated background container using pointer-event bypasses to prevent scrolling stutters.
+- **Per-Second Telemetry Ingestion** - Live token tracking (Prompt and Completion breakdown) translated into local currency groupings (INR Lakh/Crore formatting).
+- **Dual-Threshold Budget Guardrails** - Automatic triggers at 80% (warning state) and 100% (hard cap block) of monthly allocations, managed via client-side notification triggers.
+- **Unified Key Access** - Consolidated management for OpenAI, Google Gemini, Anthropic Claude, ElevenLabs, Meta Llama, and Cohere.
+- **Dynamic Workspaces** - Collapsible navigation layout, responsive detail drawers for individual employee audit logs, and on-the-fly CSV generation.
 
 ---
 
-## 📊 System Topology & Telemetry Flow
+## System Architecture
+
+The client application aggregates metrics and compares consumption records against department policy constraints. 
+
+```
+                                +---------------------------+
+                                |     Client App (SDK)      |
+                                +-------------+-------------+
+                                              |
+                                              v (API Telemetry)
+                                +-------------+-------------+
+                                |  Vantage Telemetry Service |
+                                +-------------+-------------+
+                                              |
+                                              v (Cost Translation Engine)
++-----------------------+       +-------------+-------------+
+| Gemini/GPT Cost Map   | ----> |  en-IN Currency Formatter  |
++-----------------------+       +-------------+-------------+
+                                              |
+                                              v (State Persistence)
+                                +-------------+-------------+
+                                |  Firebase Auth System     |
+                                +-------------+-------------+
+                                              |
+                                              v (Real-time View State)
+                                +-------------+-------------+
+                                |  Administration Dashboard |
+                                +---------------------------+
+```
+
+### Telemetry Processing & Data Ingestion Flow
+
+1. **Ingestion Loop**: Direct token telemetry metrics are captured from model providers, splitting costs into prompt processing, completion generation, and model-specific multiplier parameters.
+2. **Cost Formatting (en-IN Locale)**: Rupee calculation is localized using the lakh/crore naming convention with exact rounding parameters.
+3. **Budget Verification**: Active limits are verified per transaction. If a limit is breached, the UI triggers warning flags or stops incoming telemetry streams.
 
 ```mermaid
 graph TD
-    A[Client Application] -->|API Telemetry| B(Vantage Observability Gateway)
-    B -->|Calculate Cost en-IN| C{INR Converter}
-    C -->|Store Stats| D[(Vantage Database)]
-    D -->|Real-Time Push| E[Vantage AI Dashboard UI]
-    E -->|Render Popover Tooltips| F[Admin UI Shell]
+    A[Telemetry Source] -->|Raw Event| B(Telemetry Aggregator)
+    B -->|Calculate Cost| C{Model Cost Multiplier}
+    C -->|Gemini/Anthropic/GPT| D[Lakh/Crore Grouping Engine]
+    D -->|Evaluate Limits| E{Threshold Policy Engine}
+    E -->|>= 100%| F[Trigger Workspace Lock & Critical Alert]
+    E -->|>= 80%| G[Trigger Warnings Flag & Notification Banner]
+    E -->|< 80%| H[Update Chart Telemetry & Tooltips]
 ```
+
+### Authentication & Telemetry Lifecycle
+
+Vantage AI enforces strict authorization boundaries using Firebase Authentication. If a user is unauthenticated, the application displays a full-screen landing portal loading the WebGL viewport assets. Upon successful Google OAuth validation, the system:
+1. Destroys the WebGL iframe context (setting the `src` to `""`) to prevent background memory leaks and release GPU cycles.
+2. Animates the dashboard transition.
+3. Restores layout states based on cached client workspace preferences.
 
 ```mermaid
 sequenceDiagram
-    participant System as Observability Service
-    participant Policy as Budget Engine
-    participant Toast as notification System
-    participant UI as Admin Dashboard
+    participant User as Client Browser
+    participant Auth as Firebase Auth SDK
+    participant Shell as UI App Shell
+    participant WebGL as Spline WebGL Frame
 
-    System->>Policy: Sync monthly department credit limits
-    alt Spend >= 100%
-        Policy->>Toast: Push critical Toast Alert
-        Policy->>UI: Revoke integration / Lock workspace
-    else Spend >= 80%
-        Policy->>Toast: Push Warning Toast
-        Policy->>UI: Highlight threshold yellow warning state
-    end
+    User->>Auth: Request Google Sign-in Auth
+    Auth-->>User: Validate Credentials (OAuth 2.0)
+    User->>Shell: Dispatch onAuthStateChanged Event
+    Shell->>WebGL: Unload WebGL Context (src = "")
+    Shell->>Shell: Initialize Workspace State & Load Data
+    Shell->>User: Display Observability Dashboard
 ```
 
 ---
 
-## 📂 Repository Structure
+## Repository and Codebase Layout
+
+To maintain a clean and lightweight deployment context, boilerplate, unused, and helper files are ignored by default. The tracking structure is defined as follows:
 
 ```
-├── index.html         # Main Web Application Shell (All UI, state & script telemetry)
-├── firebase.json      # Routing configuration, SPA rewrites, and Cache-Control headers
-└── .firebaserc        # Firebase project targets mapping configuration
+├── index.html         # Monolithic SPA (Views, UI layout, script logic, and stylesheets)
+├── firebase.json      # Production Hosting config, SPA rewrites, Cache-Control headers
+├── .firebaserc        # Target mapping configuration (vantage-ai-eda2c)
+└── .gitignore         # Local asset exclusion policies
 ```
 
 ---
 
-## 🚀 Quick Start
+## Deployment & Production Configuration
 
-### 1. Run Locally
-Serve the directory using any static HTTP server. For example:
-```bash
-npx serve .
-```
-Or with Python:
-```bash
-python3 -m http.server 8080
-```
-Open **`http://localhost:8080`** in your browser.
+The application is deployed to Firebase Hosting. The routing and caching headers are explicitly managed to prevent stale CDN states.
 
-### 2. Deploy to Production
-Make sure you have `firebase-tools` installed:
-```bash
-npm install -g firebase-tools
-firebase deploy --only hosting --project vantage-ai-eda2c
+### Firebase Configuration (`firebase.json`)
+
+To prevent browsers from caching the single-page application script state on code revisions, custom headers are applied to bust the CDN and local browser storage layers:
+
+```json
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=0, no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
 ```
-Live production instances are hosted at **`https://vantage-ai-eda2c.web.app`**.
+
+### Deploy Commands
+
+To release updates to the live hosting targets:
+
+1. Install Firebase CLI locally:
+   ```bash
+   npm install -g firebase-tools
+   ```
+2. Verify hosting endpoints and push code:
+   ```bash
+   firebase deploy --only hosting --project vantage-ai-eda2c
+   ```
+
+Live Endpoint: **`https://vantage-ai-eda2c.web.app`**
