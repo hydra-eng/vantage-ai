@@ -1,7 +1,5 @@
-# Ignore unnecessary boilerplate/local files
+# Ignore unnecessary local files
 antigravity-dashboard-prompt.md
-app.js
-styles.css
 data/
 .firebase/
 .DS_Store
