@@ -7,7 +7,8 @@
 <meta name="description" content="Enterprise AI tool usage and credit tracking dashboard for Indian organisations. Monitor spend in ₹, detect shadow AI, manage team budgets.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -46,15 +47,14 @@
   <!-- Hero Section — Spline 3D robot fills full screen as background -->
   <section style="position:relative; min-height:100vh; overflow:hidden;">
 
-    <!-- ── 3D Spline background layer ── -->
-    <div class="spline-bg">
-      <iframe
-        id="spline-bg-iframe"
-        src="https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/"
-        frameborder="0"
-        allowfullscreen
-        loading="lazy"
-      ></iframe>
+    <!-- ── 3D Spline background layer (lazy-loaded via IntersectionObserver) ── -->
+    <div class="spline-bg" id="spline-bg-container">
+      <!-- Placeholder shown while Spline has not loaded yet -->
+      <div id="spline-placeholder" style="
+        position:absolute;inset:0;
+        background: radial-gradient(ellipse at 70% 50%, rgba(56,189,248,0.08) 0%, rgba(15,98,254,0.05) 35%, transparent 70%);
+      "></div>
+      <!-- iframe inserted by JS only when hero enters viewport -->
       <!-- Hard mask: solid rectangle over the bottom-right watermark -->
       <div class="spline-watermark-mask"></div>
     </div>
@@ -692,18 +692,100 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   signOut(auth);
 });
 
+// ── Spline lazy-load + pause controller ──────────────────────────────────
+const SPLINE_SRC = 'https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/';
+let splineLoaded = false;
+let splineIframe = null;
+
+function getOrCreateSplineIframe() {
+  if (splineIframe) return splineIframe;
+  const container = document.getElementById('spline-bg-container');
+  if (!container) return null;
+  const iframe = document.createElement('iframe');
+  iframe.id = 'spline-bg-iframe';
+  iframe.src = SPLINE_SRC;
+  iframe.frameBorder = '0';
+  iframe.allowFullscreen = true;
+  iframe.setAttribute('loading', 'lazy');
+  iframe.setAttribute('aria-hidden', 'true');
+  // Insert before the watermark mask
+  const mask = container.querySelector('.spline-watermark-mask');
+  container.insertBefore(iframe, mask);
+  splineIframe = iframe;
+  return iframe;
+}
+
+function loadSpline() {
+  if (splineLoaded) return;
+  splineLoaded = true;
+  const placeholder = document.getElementById('spline-placeholder');
+  const iframe = getOrCreateSplineIframe();
+  if (iframe && placeholder) {
+    iframe.addEventListener('load', () => {
+      // Fade out placeholder once scene is ready
+      placeholder.style.transition = 'opacity 0.6s ease';
+      placeholder.style.opacity = '0';
+      setTimeout(() => { placeholder.style.display = 'none'; }, 700);
+    }, { once: true });
+  }
+}
+
+function unloadSpline() {
+  if (splineIframe) {
+    splineIframe.setAttribute('src', '');
+    splineIframe.remove();
+    splineIframe = null;
+    splineLoaded = false;
+    const placeholder = document.getElementById('spline-placeholder');
+    if (placeholder) {
+      placeholder.style.opacity = '1';
+      placeholder.style.display = '';
+    }
+  }
+}
+
+// Pause rendering when tab is backgrounded
+document.addEventListener('visibilitychange', () => {
+  if (!splineIframe) return;
+  if (document.hidden) {
+    // Suspend by removing src
+    splineIframe._suspendedSrc = splineIframe.src;
+    if (splineIframe.src) splineIframe.setAttribute('src', '');
+  } else {
+    // Resume
+    if (splineIframe._suspendedSrc) {
+      splineIframe.setAttribute('src', splineIframe._suspendedSrc);
+    }
+  }
+});
+
+// Lazy-init: only load Spline when hero section is visible
+const heroSection = document.querySelector('#login-view section');
+if (heroSection && 'IntersectionObserver' in window) {
+  const heroObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        loadSpline();
+        heroObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.01 });
+  heroObserver.observe(heroSection);
+} else {
+  // Fallback for browsers without IntersectionObserver
+  loadSpline();
+}
+
+// ── Firebase Auth ─────────────────────────────────────────────────────────
 onAuthStateChanged(auth, (user) => {
   const loginView = document.getElementById('login-view');
   const appShell = document.getElementById('app-shell');
-  const splineIframe = document.getElementById('spline-bg-iframe');
   if (user) {
     loginView.classList.add('hidden');
     appShell.classList.remove('hidden');
 
-    // Unload Spline iframe to release WebGL/GPU resources
-    if (splineIframe && splineIframe.src !== '') {
-      splineIframe.setAttribute('src', '');
-    }
+    // Release WebGL/GPU resources — user is authenticated, no need for 3D scene
+    unloadSpline();
 
     // Populate User Details
     const name = user.displayName || 'IT Admin';
@@ -721,10 +803,18 @@ onAuthStateChanged(auth, (user) => {
   } else {
     loginView.classList.remove('hidden');
     appShell.classList.add('hidden');
-
-    // Restore Spline background on landing view
-    if (splineIframe && splineIframe.src === '') {
-      splineIframe.setAttribute('src', 'https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/');
+    // Spline will reload naturally via the IntersectionObserver when
+    // the hero section becomes visible again
+    // (Re-observe hero on logout)
+    if (!splineLoaded && heroSection && 'IntersectionObserver' in window) {
+      const reObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { loadSpline(); reObserver.disconnect(); }
+        });
+      }, { threshold: 0.01 });
+      reObserver.observe(heroSection);
+    } else if (!splineLoaded) {
+      loadSpline();
     }
   }
 });

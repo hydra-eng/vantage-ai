@@ -607,7 +607,8 @@ select.ff-in option{background:var(--surface)}
   display: inline-flex;
   gap: 16px;
   animation: marquee-scroll 25s linear infinite;
-  will-change: transform;
+  will-change: auto;
+  contain: layout style;
 }
 .marquee-item {
   display: inline-flex;
@@ -640,9 +641,9 @@ select.ff-in option{background:var(--surface)}
   display: flex;
   align-items: center;
   gap: 7px;
-  background: rgba(9,9,11,0.82);
+  background: rgba(9,9,11,0.92);
   border: 1px solid rgba(255,255,255,0.1);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter removed: triggers software rendering on Windows integrated GPUs */
   padding: 7px 14px;
   border-radius: 20px;
   font-family: var(--mono);
