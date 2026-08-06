@@ -1,10 +1,9 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase Hosting — vantage-ai
 
 on:
   push:
     branches:
       - main
-      - perf/windows-lag-fix
   pull_request:
     branches:
       - main
@@ -16,20 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Firebase Hosting (Preview -- PRs)
+      - name: Deploy Preview (PRs)
         if: github.event_name == 'pull_request'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_PERF }}
-          projectId: vantage-ai-perf-2026
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
+          projectId: vantage-ai-eda2c
           channelId: pr-${{ github.event.pull_request.number }}
 
-      - name: Deploy to Firebase Hosting (Live -- main branch)
+      - name: Deploy Live (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_PERF }}
-          projectId: vantage-ai-perf-2026
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
+          projectId: vantage-ai-eda2c
           channelId: live
