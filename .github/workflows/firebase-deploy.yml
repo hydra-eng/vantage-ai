@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting — vantage-ai
+name: Deploy to Firebase Hosting — Vantage AI
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
-          projectId: vantage-ai-eda2c
+          projectId: vantage-ai-perf-2026
           channelId: pr-${{ github.event.pull_request.number }}
 
       - name: Deploy Live (main)
@@ -30,5 +30,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
-          projectId: vantage-ai-eda2c
+          projectId: vantage-ai-perf-2026
           channelId: live
