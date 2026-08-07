@@ -205,6 +205,9 @@
   </div>
   <div class="hdr-ctx">AI Spend Control · TechCorp India Pvt. Ltd.</div>
   <div class="hdr-sync">Synced 3 min ago</div>
+  <button class="hdr-theme-toggle" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+    <span id="theme-toggle-icon">🌙</span> <span id="theme-toggle-lbl">Dark</span>
+  </button>
   <div class="hdr-user">
     <div class="u-av">IT</div>
     <span>IT Admin</span>
@@ -976,6 +979,34 @@ window.addEventListener('keydown', (e) => {
     if (isAppActive) clearUserSession(); else renderUserSession();
   }
 });
+
+// ── Theme Switcher Controller (Dark / Light Mode) ─────────────────────────
+function initTheme() {
+  const savedTheme = localStorage.getItem('vantage_theme') || 'dark';
+  applyTheme(savedTheme);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('vantage_theme', theme);
+  const iconEl = document.getElementById('theme-toggle-icon');
+  const lblEl = document.getElementById('theme-toggle-lbl');
+  if (theme === 'light') {
+    if (iconEl) iconEl.textContent = '☀️';
+    if (lblEl) lblEl.textContent = 'Light';
+  } else {
+    if (iconEl) iconEl.textContent = '🌙';
+    if (lblEl) lblEl.textContent = 'Dark';
+  }
+}
+
+document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  const nextTheme = current === 'light' ? 'dark' : 'light';
+  applyTheme(nextTheme);
+});
+
+initTheme();
 
 // Auto-restore session if user refreshed while logged in
 if (sessionStorage.getItem('vantage_active_session') === 'true') {
