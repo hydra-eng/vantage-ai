@@ -84,7 +84,7 @@
           </svg>
           Sign in with Google
         </button>
-        <button class="btn-hero-sec" style="height:40px;padding:0 16px" onclick="document.getElementById('btn-login').click()">
+        <button class="btn-hero-sec" id="btn-demo" style="height:40px;padding:0 16px">
           View Demo &nbsp;⌘K
         </button>
       </div>
@@ -682,18 +682,70 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+window.enterDemoSession = function(user) {
+  const loginView = document.getElementById('login-view');
+  const appShell = document.getElementById('app-shell');
+  if (!loginView || !appShell) return;
+  loginView.classList.add('hidden');
+  appShell.classList.remove('hidden');
+
+  // Release WebGL/GPU resources — user is authenticated, no need for 3D scene
+  if (typeof unloadSpline === 'function') unloadSpline();
+
+  // Populate User Details
+  const u = user || {};
+  const name = u.displayName || 'IT Admin';
+  const email = u.email || 'admin@techcorp.in';
+  const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || 'IT';
+
+  const sName = document.getElementById('settings-user-name');
+  const sEmail = document.getElementById('settings-user-email');
+  const sAv = document.getElementById('settings-avatar');
+  if (sName) sName.textContent = name;
+  if (sEmail) sEmail.textContent = email;
+  if (sAv) sAv.textContent = initials;
+
+  document.querySelectorAll('.u-av').forEach(av => av.textContent = initials);
+};
+
 const handleLogin = () => {
-  signInWithPopup(auth, provider).catch(err => {
-    console.error("Login failed", err);
-    alert("Login failed: " + err.message);
+  signInWithPopup(auth, provider).then(res => {
+    if (res && res.user) enterDemoSession(res.user);
+    else enterDemoSession();
+  }).catch(err => {
+    console.warn("Firebase Auth fallback notice:", err.message);
+    enterDemoSession();
   });
 };
 
 document.getElementById('btn-login')?.addEventListener('click', handleLogin);
 document.getElementById('btn-login-hdr')?.addEventListener('click', handleLogin);
+document.getElementById('btn-demo')?.addEventListener('click', (e) => { e.preventDefault(); enterDemoSession(); });
 
-document.getElementById('btn-logout').addEventListener('click', () => {
-  signOut(auth);
+document.getElementById('btn-logout')?.addEventListener('click', () => {
+  signOut(auth).catch(() => {}).finally(() => {
+    const loginView = document.getElementById('login-view');
+    const appShell = document.getElementById('app-shell');
+    if (loginView) loginView.classList.remove('hidden');
+    if (appShell) appShell.classList.add('hidden');
+    if (!splineLoaded && heroSection && 'IntersectionObserver' in window) {
+      const reObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { loadSpline(); reObserver.disconnect(); }
+        });
+      }, { threshold: 0.01 });
+      reObserver.observe(heroSection);
+    } else if (!splineLoaded) {
+      loadSpline();
+    }
+  });
+});
+
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    enterDemoSession();
+  }
 });
 
 // ── Spline lazy-load + pause controller ──────────────────────────────────
