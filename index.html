@@ -375,7 +375,28 @@
         <button class="btn btn-primary btn-sm" data-view="add-employee">+ Add Employee</button>
       </div>
     </div>
+
+    <!-- Quick Stat Strip for Employees View -->
+    <div class="emp-stat-strip">
+      <div class="emp-stat-card">
+        <span class="emp-stat-lbl">Total Employees</span>
+        <span class="emp-stat-val" id="emp-stat-total">22</span>
+      </div>
+      <div class="emp-stat-card">
+        <span class="emp-stat-lbl">Monthly AI Spend</span>
+        <span class="emp-stat-val" id="emp-stat-spend">₹3,39,553</span>
+      </div>
+      <div class="emp-stat-card emp-stat-card--err">
+        <span class="emp-stat-lbl">Anomalies / Shadow AI</span>
+        <span class="emp-stat-val emp-stat-val--err" id="emp-stat-anomalies">2 flagged</span>
+      </div>
+    </div>
+
     <div class="fbar">
+      <div class="fbar-search-wrap">
+        <span class="fbar-search-icon">🔍</span>
+        <input type="text" class="fbar-search" id="emp-search" placeholder="Search by name, email, role..." aria-label="Search employees" />
+      </div>
       <select class="fbar-sel" id="emp-filter-team" aria-label="Filter by team">
         <option value="">All teams</option>
         <option value="eng">Engineering</option>
@@ -390,21 +411,24 @@
       </select>
       <span class="fbar-count" id="emp-fbar-count">22 employees</span>
     </div>
-    <div class="tw">
-      <table class="cdt" id="emp-table" aria-label="Employee AI usage">
-        <thead>
-          <tr>
-            <th style="width:280px">Employee</th>
-            <th>Team</th>
-            <th>Providers</th>
-            <th class="ra" style="width:120px">Jul spend ↓</th>
-            <th class="ra" style="width:110px">Last active</th>
-            <th style="width:120px">Status</th>
-            <th style="width:90px"></th>
-          </tr>
-        </thead>
-        <tbody id="emp-tbody"></tbody>
-      </table>
+
+    <div class="tw-container">
+      <div class="tw">
+        <table class="cdt" id="emp-table" aria-label="Employee AI usage">
+          <thead>
+            <tr>
+              <th style="width:280px">Employee</th>
+              <th>Team</th>
+              <th>Providers</th>
+              <th class="ra" style="width:130px">Jul spend ↓</th>
+              <th class="ra" style="width:120px">Last active</th>
+              <th style="width:120px">Status</th>
+              <th style="width:90px"></th>
+            </tr>
+          </thead>
+          <tbody id="emp-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 

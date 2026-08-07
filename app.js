@@ -263,13 +263,19 @@ function renderOvCoverage(){
 // ============================================================
 // EMPLOYEES TABLE
 // ============================================================
-let empTeamFilter='',empStatusFilter='',selectedEmpId=null;
+// EMPLOYEES TABLE
+// ============================================================
+let empTeamFilter='',empStatusFilter='',empSearchQuery='',selectedEmpId=null;
 
 function renderEmployees(){
   const tbody=document.getElementById('emp-tbody');if(!tbody)return;
   let rows=[...employees];
   if(empTeamFilter)rows=rows.filter(e=>e.team===empTeamFilter);
   if(empStatusFilter==='anomaly')rows=rows.filter(e=>e.anomaly);
+  if(empSearchQuery){
+    const q=empSearchQuery.toLowerCase();
+    rows=rows.filter(e=>e.nm.toLowerCase().includes(q)||e.email.toLowerCase().includes(q)||e.role.toLowerCase().includes(q));
+  }
   rows.sort((a,b)=>b.cost-a.cost);
   tbody.innerHTML=rows.map(emp=>{
     const marks=emp.tools.slice(0,4).map(tid=>{
@@ -299,6 +305,14 @@ function renderEmployees(){
   if(cnt)cnt.textContent=`${rows.length} employee${rows.length!==1?'s':''}`;
   const sub=document.getElementById('emp-sub');
   if(sub)sub.textContent=`${rows.length} shown · ${employees.filter(e=>e.anomaly).length} anomalies`;
+  
+  // Stat strip updates
+  const totalCost=rows.reduce((sum,e)=>sum+e.cost,0);
+  const totalAnomalies=rows.filter(e=>e.anomaly||e.shadowAI).length;
+  const statTot=document.getElementById('emp-stat-total');if(statTot)statTot.textContent=rows.length;
+  const statSp=document.getElementById('emp-stat-spend');if(statSp)statSp.textContent=fmtINR(totalCost);
+  const statAnom=document.getElementById('emp-stat-anomalies');if(statAnom)statAnom.textContent=`${totalAnomalies} flagged`;
+
   tbody.querySelectorAll('tr[data-emp]').forEach(row=>{
     row.addEventListener('click',()=>openSidePanel(row.dataset.emp));
     row.addEventListener('keydown',e=>{if(e.key==='Enter')openSidePanel(row.dataset.emp);});
@@ -307,6 +321,7 @@ function renderEmployees(){
 
 document.getElementById('emp-filter-team')?.addEventListener('change',e=>{empTeamFilter=e.target.value;renderEmployees();});
 document.getElementById('emp-filter-status')?.addEventListener('change',e=>{empStatusFilter=e.target.value;renderEmployees();});
+document.getElementById('emp-search')?.addEventListener('input',e=>{empSearchQuery=e.target.value;renderEmployees();});
 
 // ============================================================
 // EMPLOYEE SIDE PANEL
