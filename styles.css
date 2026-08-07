@@ -195,7 +195,7 @@ body{font-family:var(--sans);background:var(--page);color:var(--t1);min-height:1
 .tw{overflow-x:auto;position:relative}
 table.cdt{width:100%;border-collapse:collapse;background:var(--surface)}
 table.cdt thead{background:var(--surface)}
-table.cdt th{font-size:11px;font-weight:600;color:var(--t2);text-align:left;padding:10px 16px;border-bottom:1px solid var(--b2);white-space:nowrap;position:sticky;top:calc(var(--hh) + 98px);background:var(--surface);z-index:90;text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono)}
+table.cdt th{font-size:11px;font-weight:600;color:var(--t2);text-align:left;padding:12px 16px;border-bottom:1px solid var(--b2);white-space:nowrap;position:sticky;top:var(--hh);background:var(--surface);z-index:90;text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono)}
 table.cdt th.ra{text-align:right}
 table.cdt td{padding:11px 16px;border-bottom:1px solid var(--b1);vertical-align:middle;font-size:13px}
 table.cdt tbody tr{cursor:pointer;transition:background 80ms}
@@ -316,14 +316,14 @@ table.cdt tbody tr.sel{background:var(--blue-lt)}
 
 /* ── EMPLOYEES STAT STRIP ────────────────────────── */
 .emp-stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px 32px;background:var(--page);border-bottom:1px solid var(--b1)}
-.emp-stat-card{background:var(--surface);border:1px solid var(--b1);padding:14px 20px;display:flex;flex-direction:column;gap:4px}
+.emp-stat-card{background:var(--surface);border:1px solid var(--b1);padding:16px 20px;display:block}
 .emp-stat-card--err{border-left:3px solid var(--red)}
-.emp-stat-lbl{font-family:var(--mono);font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.05em}
-.emp-stat-val{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--t1)}
+.emp-stat-lbl{display:block;font-family:var(--mono);font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.emp-stat-val{display:block;font-family:var(--mono);font-size:22px;font-weight:600;color:var(--t1);line-height:1.2}
 .emp-stat-val--err{color:var(--red)}
 
 /* ── FILTER BAR ──────────────────────────────────── */
-.fbar{display:flex;align-items:center;gap:12px;padding:10px 32px;background:var(--surface);border-bottom:1px solid var(--b1);position:sticky;top:calc(var(--hh) + 54px);z-index:95}
+.fbar{display:flex;align-items:center;gap:12px;padding:12px 32px;background:var(--surface);border-bottom:1px solid var(--b1)}
 .fbar-search-wrap{position:relative;flex:1;min-width:220px;max-width:360px}
 .fbar-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;opacity:0.6;pointer-events:none}
 .fbar-search{width:100%;background:var(--page);border:1px solid var(--b2);color:var(--t1);padding:7px 10px 7px 32px;font-family:var(--sans);font-size:13px;outline:none;transition:border-color 80ms}
