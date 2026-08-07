@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "vantage-ai-app",
+    "site": "vantage-ai-perf-2026",
     "public": ".",
     "ignore": [
       "firebase.json",
