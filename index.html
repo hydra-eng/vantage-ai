@@ -665,90 +665,8 @@
   <div class="sp-body" id="sp-body"></div>
 </aside>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-
-const firebaseConfig = {
-  projectId: "vantage-ai-perf-2026",
-  appId: "1:518030922222:web:cf742dc5df22a5bcb0feff",
-  storageBucket: "vantage-ai-perf-2026.firebasestorage.app",
-  apiKey: "AIzaSyCdase3rOnsR9_74vfa1dNgTvee0GbGGGU",
-  authDomain: "vantage-ai-perf-2026.firebaseapp.com",
-  messagingSenderId: "518030922222"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-window.enterDemoSession = function(user) {
-  const loginView = document.getElementById('login-view');
-  const appShell = document.getElementById('app-shell');
-  if (!loginView || !appShell) return;
-  loginView.classList.add('hidden');
-  appShell.classList.remove('hidden');
-
-  // Release WebGL/GPU resources — user is authenticated, no need for 3D scene
-  if (typeof unloadSpline === 'function') unloadSpline();
-
-  // Populate User Details
-  const u = user || {};
-  const name = u.displayName || 'IT Admin';
-  const email = u.email || 'admin@techcorp.in';
-  const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || 'IT';
-
-  const sName = document.getElementById('settings-user-name');
-  const sEmail = document.getElementById('settings-user-email');
-  const sAv = document.getElementById('settings-avatar');
-  if (sName) sName.textContent = name;
-  if (sEmail) sEmail.textContent = email;
-  if (sAv) sAv.textContent = initials;
-
-  document.querySelectorAll('.u-av').forEach(av => av.textContent = initials);
-};
-
-const handleLogin = () => {
-  signInWithPopup(auth, provider).then(res => {
-    if (res && res.user) enterDemoSession(res.user);
-    else enterDemoSession();
-  }).catch(err => {
-    console.warn("Firebase Auth fallback notice:", err.message);
-    enterDemoSession();
-  });
-};
-
-document.getElementById('btn-login')?.addEventListener('click', handleLogin);
-document.getElementById('btn-login-hdr')?.addEventListener('click', handleLogin);
-document.getElementById('btn-demo')?.addEventListener('click', (e) => { e.preventDefault(); enterDemoSession(); });
-
-document.getElementById('btn-logout')?.addEventListener('click', () => {
-  signOut(auth).catch(() => {}).finally(() => {
-    const loginView = document.getElementById('login-view');
-    const appShell = document.getElementById('app-shell');
-    if (loginView) loginView.classList.remove('hidden');
-    if (appShell) appShell.classList.add('hidden');
-    if (!splineLoaded && heroSection && 'IntersectionObserver' in window) {
-      const reObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) { loadSpline(); reObserver.disconnect(); }
-        });
-      }, { threshold: 0.01 });
-      reObserver.observe(heroSection);
-    } else if (!splineLoaded) {
-      loadSpline();
-    }
-  });
-});
-
-window.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-    e.preventDefault();
-    enterDemoSession();
-  }
-});
-
-// ── Spline lazy-load + pause controller ──────────────────────────────────
+<script>
+// ── Spline 3D Scene Controller (Lazy Load + Pause + Memory Release) ──────
 const SPLINE_SRC = 'https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/';
 let splineLoaded = false;
 let splineIframe = null;
@@ -764,7 +682,6 @@ function getOrCreateSplineIframe() {
   iframe.allowFullscreen = true;
   iframe.setAttribute('loading', 'lazy');
   iframe.setAttribute('aria-hidden', 'true');
-  // Insert before the watermark mask
   const mask = container.querySelector('.spline-watermark-mask');
   container.insertBefore(iframe, mask);
   splineIframe = iframe;
@@ -778,7 +695,6 @@ function loadSpline() {
   const iframe = getOrCreateSplineIframe();
   if (iframe && placeholder) {
     iframe.addEventListener('load', () => {
-      // Fade out placeholder once scene is ready
       placeholder.style.transition = 'opacity 0.6s ease';
       placeholder.style.opacity = '0';
       setTimeout(() => { placeholder.style.display = 'none'; }, 700);
@@ -800,15 +716,13 @@ function unloadSpline() {
   }
 }
 
-// Pause rendering when tab is backgrounded
+// Pause WebGL rendering when tab is backgrounded
 document.addEventListener('visibilitychange', () => {
   if (!splineIframe) return;
   if (document.hidden) {
-    // Suspend by removing src
     splineIframe._suspendedSrc = splineIframe.src;
     if (splineIframe.src) splineIframe.setAttribute('src', '');
   } else {
-    // Resume
     if (splineIframe._suspendedSrc) {
       splineIframe.setAttribute('src', splineIframe._suspendedSrc);
     }
@@ -828,52 +742,75 @@ if (heroSection && 'IntersectionObserver' in window) {
   }, { threshold: 0.01 });
   heroObserver.observe(heroSection);
 } else {
-  // Fallback for browsers without IntersectionObserver
   loadSpline();
 }
 
-// ── Firebase Auth ─────────────────────────────────────────────────────────
-onAuthStateChanged(auth, (user) => {
+// ── Application Session Controller (Zero External Auth Dependency) ───────
+function enterSession(user) {
   const loginView = document.getElementById('login-view');
   const appShell = document.getElementById('app-shell');
-  if (user) {
-    loginView.classList.add('hidden');
-    appShell.classList.remove('hidden');
+  if (!loginView || !appShell) return;
 
-    // Release WebGL/GPU resources — user is authenticated, no need for 3D scene
-    unloadSpline();
+  loginView.classList.add('hidden');
+  appShell.classList.remove('hidden');
 
-    // Populate User Details
-    const name = user.displayName || 'IT Admin';
-    const email = user.email || 'admin@techcorp.in';
-    const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || 'IT';
+  // Release WebGL/GPU resources when app shell is active
+  unloadSpline();
 
-    const sName = document.getElementById('settings-user-name');
-    const sEmail = document.getElementById('settings-user-email');
-    const sAv = document.getElementById('settings-avatar');
-    if (sName) sName.textContent = name;
-    if (sEmail) sEmail.textContent = email;
-    if (sAv) sAv.textContent = initials;
+  const u = user || { displayName: 'IT Admin', email: 'admin@techcorp.in' };
+  const name = u.displayName || 'IT Admin';
+  const email = u.email || 'admin@techcorp.in';
+  const initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || 'IT';
 
-    document.querySelectorAll('.u-av').forEach(av => av.textContent = initials);
-  } else {
-    loginView.classList.remove('hidden');
-    appShell.classList.add('hidden');
-    // Spline will reload naturally via the IntersectionObserver when
-    // the hero section becomes visible again
-    // (Re-observe hero on logout)
-    if (!splineLoaded && heroSection && 'IntersectionObserver' in window) {
-      const reObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) { loadSpline(); reObserver.disconnect(); }
-        });
-      }, { threshold: 0.01 });
-      reObserver.observe(heroSection);
-    } else if (!splineLoaded) {
-      loadSpline();
-    }
+  const sName = document.getElementById('settings-user-name');
+  const sEmail = document.getElementById('settings-user-email');
+  const sAv = document.getElementById('settings-avatar');
+  if (sName) sName.textContent = name;
+  if (sEmail) sEmail.textContent = email;
+  if (sAv) sAv.textContent = initials;
+
+  document.querySelectorAll('.u-av').forEach(av => av.textContent = initials);
+  sessionStorage.setItem('vantage_active_session', 'true');
+}
+
+function exitSession() {
+  const loginView = document.getElementById('login-view');
+  const appShell = document.getElementById('app-shell');
+  if (loginView) loginView.classList.remove('hidden');
+  if (appShell) appShell.classList.add('hidden');
+  sessionStorage.removeItem('vantage_active_session');
+
+  if (!splineLoaded && heroSection && 'IntersectionObserver' in window) {
+    const reObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { loadSpline(); reObserver.disconnect(); }
+      });
+    }, { threshold: 0.01 });
+    reObserver.observe(heroSection);
+  } else if (!splineLoaded) {
+    loadSpline();
+  }
+}
+
+// Bind navigation buttons
+document.getElementById('btn-login')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
+document.getElementById('btn-login-hdr')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
+document.getElementById('btn-demo')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
+document.getElementById('btn-logout')?.addEventListener('click', (e) => { e.preventDefault(); exitSession(); });
+
+// Keyboard shortcut ⌘K / Ctrl+K
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    const isAppActive = !document.getElementById('app-shell')?.classList.contains('hidden');
+    if (isAppActive) exitSession(); else enterSession();
   }
 });
+
+// Auto-restore session if user refreshed while logged in
+if (sessionStorage.getItem('vantage_active_session') === 'true') {
+  enterSession();
+}
 </script>
 
 <script src="app.js"></script>
