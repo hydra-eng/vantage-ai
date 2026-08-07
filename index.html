@@ -665,7 +665,23 @@
   <div class="sp-body" id="sp-body"></div>
 </aside>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+const firebaseConfig = {
+  projectId: "vantage-ai-perf-2026",
+  appId: "1:518030922222:web:cf742dc5df22a5bcb0feff",
+  storageBucket: "vantage-ai-perf-2026.firebasestorage.app",
+  apiKey: "AIzaSyCdase3rOnsR9_74vfa1dNgTvee0GbGGGU",
+  authDomain: "vantage-ai-perf-2026.firebaseapp.com",
+  messagingSenderId: "518030922222"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
 // ── Spline 3D Scene Controller (Lazy Load + Pause + Memory Release) ──────
 const SPLINE_SRC = 'https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/';
 let splineLoaded = false;
@@ -745,8 +761,8 @@ if (heroSection && 'IntersectionObserver' in window) {
   loadSpline();
 }
 
-// ── Application Session Controller (Zero External Auth Dependency) ───────
-function enterSession(user) {
+// ── Application Session Controller ──────────────────────────────────────
+function renderUserSession(user) {
   const loginView = document.getElementById('login-view');
   const appShell = document.getElementById('app-shell');
   if (!loginView || !appShell) return;
@@ -773,7 +789,7 @@ function enterSession(user) {
   sessionStorage.setItem('vantage_active_session', 'true');
 }
 
-function exitSession() {
+function clearUserSession() {
   const loginView = document.getElementById('login-view');
   const appShell = document.getElementById('app-shell');
   if (loginView) loginView.classList.remove('hidden');
@@ -792,24 +808,49 @@ function exitSession() {
   }
 }
 
-// Bind navigation buttons
-document.getElementById('btn-login')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
-document.getElementById('btn-login-hdr')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
-document.getElementById('btn-demo')?.addEventListener('click', (e) => { e.preventDefault(); enterSession(); });
-document.getElementById('btn-logout')?.addEventListener('click', (e) => { e.preventDefault(); exitSession(); });
+// Handle Google Popup Auth
+const handleGoogleLogin = () => {
+  signInWithPopup(auth, provider).then(res => {
+    if (res && res.user) renderUserSession(res.user);
+    else renderUserSession();
+  }).catch(err => {
+    console.warn("Google Auth popup notice:", err.message);
+    // Seamless fallback to demo session if popup blocked or unconfigured
+    renderUserSession();
+  });
+};
+
+// Bind UI actions
+document.getElementById('btn-login')?.addEventListener('click', (e) => { e.preventDefault(); handleGoogleLogin(); });
+document.getElementById('btn-login-hdr')?.addEventListener('click', (e) => { e.preventDefault(); handleGoogleLogin(); });
+document.getElementById('btn-demo')?.addEventListener('click', (e) => { e.preventDefault(); renderUserSession(); });
+
+document.getElementById('btn-logout')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  signOut(auth).catch(() => {}).finally(() => {
+    clearUserSession();
+  });
+});
+
+// Auth state observer for Google Sign-In
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    renderUserSession(user);
+  }
+});
 
 // Keyboard shortcut ⌘K / Ctrl+K
 window.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
     const isAppActive = !document.getElementById('app-shell')?.classList.contains('hidden');
-    if (isAppActive) exitSession(); else enterSession();
+    if (isAppActive) clearUserSession(); else renderUserSession();
   }
 });
 
 // Auto-restore session if user refreshed while logged in
 if (sessionStorage.getItem('vantage_active_session') === 'true') {
-  enterSession();
+  renderUserSession();
 }
 </script>
 
