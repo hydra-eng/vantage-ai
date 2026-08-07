@@ -22,7 +22,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
           projectId: vantage-ai-perf-2026
-          target: vantage-ai-perf-2026
+          target: vantage-ai-app
           channelId: pr-${{ github.event.pull_request.number }}
 
       - name: Deploy Live (main)
@@ -32,5 +32,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VANTAGE_AI_EDA2C }}
           projectId: vantage-ai-perf-2026
-          target: vantage-ai-perf-2026
+          target: vantage-ai-app
           channelId: live
