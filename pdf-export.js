@@ -286,7 +286,8 @@ function buildSheet1(doc, opts) {
   billedLines.forEach(([txt, bold], i) => {
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setFontSize(bold ? 7.5 : 6.8);
-    doc.setTextColor(bold ? ...P.ink : ...P.subtext);
+    const tc1 = bold ? P.ink : P.subtext;
+    doc.setTextColor(...tc1);
     doc.text(txt, ML + 3, y + 8 + i * 3.8);
   });
 
@@ -468,21 +469,22 @@ function buildSheet1(doc, opts) {
     }
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setFontSize(7);
-    doc.setTextColor(bold ? ...P.headerBg : ...P.subtext);
+    const tc2 = bold ? P.headerBg : P.subtext;
+    doc.setTextColor(...tc2);
     doc.text(k, ML + 3, ly);
     doc.text(v, ML + halfW - 3, ly, { align: 'right' });
   });
 
   // Right: Bank details
-  const rx = ML + halfW + 4;
+  const rxBank = ML + halfW + 4;
   doc.setFillColor(252, 253, 255);
-  doc.rect(rx, y, halfW, boxH, 'F');
+  doc.rect(rxBank, y, halfW, boxH, 'F');
   doc.setDrawColor(...P.border);
-  doc.rect(rx, y, halfW, boxH);
+  doc.rect(rxBank, y, halfW, boxH);
   doc.setFillColor(...P.thBg);
-  doc.rect(rx, y, halfW, 4, 'F');
+  doc.rect(rxBank, y, halfW, 4, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.white);
-  doc.text('PAYMENT DETAILS — NEFT / RTGS / IMPS', rx + 3, y + 2.8);
+  doc.text('PAYMENT DETAILS — NEFT / RTGS / IMPS', rxBank + 3, y + 2.8);
 
   const bankRows = [
     ['Account Name',  CO.name],
@@ -495,9 +497,9 @@ function buildSheet1(doc, opts) {
   bankRows.forEach(([k, v], i) => {
     const ly = y + 7 + i * 3.9;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(...P.subtext);
-    doc.text(k + ':', rx + 3, ly);
+    doc.text(k + ':', rxBank + 3, ly);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.ink);
-    doc.text(v, rx + halfW - 3, ly, { align: 'right' });
+    doc.text(v, rxBank + halfW - 3, ly, { align: 'right' });
   });
 
   y += boxH + 5;
@@ -897,20 +899,27 @@ window.exportVantagePDF = async function(options) {
     }
 
     var fn = 'Vantage_Billing_Packet_' + opts.period.replace(/\s+/g, '_') + '.pdf';
+    var blob = doc.output('blob');
+    var blobUrl = URL.createObjectURL(blob);
+
+    // 1. Direct anchor download link
+    var link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fn;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function() {
+      if (link.parentNode) link.parentNode.removeChild(link);
+    }, 1000);
+
+    // 2. Open PDF preview in new tab if popups allowed
     try {
-      doc.save(fn);
-    } catch(saveErr) {
-      console.warn('[PDF] doc.save failed, triggering Blob download fallback:', saveErr);
-      var blob = doc.output('blob');
-      var blobUrl = URL.createObjectURL(blob);
-      var link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fn;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 10000);
+      window.open(blobUrl, '_blank');
+    } catch(winErr) {
+      console.log('[PDF] New window open suppressed by browser:', winErr);
     }
+
     finishProgress();
     window.showToast && window.showToast('Downloaded \u2014 ' + fn, 'success');
 
