@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -86,9 +86,6 @@
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.16 7.07l3.68 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
               Sign in with Google
-            </button>
-            <button class="btn-hero-sec" id="btn-phone-modal-open">
-              📱 Phone OTP
             </button>
           </div>
 
@@ -625,6 +622,13 @@
     </div>
   </section>
 
+</div><!-- /#login-view -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     APP SHELL — only shown after Google sign-in
+     ═══════════════════════════════════════════════════════════ -->
+<div id="app-shell" class="hidden">
+
   <!-- ═══ VIEW 1: OVERVIEW ════════════════════════ -->
   <section id="view-overview" class="view active">
     <div class="vh">
@@ -1048,10 +1052,7 @@
     </div>
   </section>
 
-</main>
-</div> <!-- /#app-shell -->
-
-<!-- EMPLOYEE DETAIL SIDE PANEL -->
+<!-- EMPLOYEE DETAIL SIDE PANEL (inside app-shell) -->
 <aside id="emp-panel" role="complementary" aria-label="Employee detail">
   <div class="sp-head">
     <div class="sp-av" id="sp-av"></div>
@@ -1064,37 +1065,12 @@
   <div class="sp-body" id="sp-body"></div>
 </aside>
 
-<!-- PHONE AUTH MODAL -->
-<div id="phone-modal" class="phone-modal-overlay hidden">
-  <div class="phone-modal-box">
-    <button class="phone-modal-close" id="btn-phone-modal-close" aria-label="Close">&times;</button>
-    <div id="phone-step-1">
-      <div class="phone-modal-title">Sign in with Phone</div>
-      <div class="phone-modal-sub">Enter your mobile number to receive a 6-digit OTP code</div>
-      <div class="phone-inp-grp">
-        <label class="ff-lbl" for="phone-num-input">Mobile Number</label>
-        <input type="tel" id="phone-num-input" class="phone-inp" placeholder="+91 98765 43210" value="+91 ">
-      </div>
-      <button class="btn btn-primary" id="btn-send-otp" style="width:100%;justify-content:center;height:38px">Send OTP &rarr;</button>
-      <div id="phone-status-msg" class="phone-msg"></div>
-    </div>
-    <div id="phone-step-2" class="hidden">
-      <div class="phone-modal-title">Enter Verification Code</div>
-      <div class="phone-modal-sub" id="otp-sent-sub">OTP sent to your number</div>
-      <div class="phone-inp-grp">
-        <label class="ff-lbl" for="otp-code-input">6-Digit OTP</label>
-        <input type="text" id="otp-code-input" class="phone-inp" placeholder="123456" maxlength="6" pattern="[0-9]*">
-      </div>
-      <button class="btn btn-primary" id="btn-verify-otp" style="width:100%;justify-content:center;height:38px">Verify &amp; Sign In &rarr;</button>
-      <div id="otp-status-msg" class="phone-msg"></div>
-    </div>
-    <div id="recaptcha-container"></div>
-  </div>
-</div>
+</div><!-- /#app-shell -->
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
 const firebaseConfig = {
   projectId: "vantage-ai-perf-2026",
@@ -1108,7 +1084,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-let confirmationResult = null;
 
 // ── Spline 3D Scene Controller (Lazy Load + Pause + Memory Release) ──────
 const SPLINE_SRC = 'https://my.spline.design/nexbotrobotcharacterconcept-Hx19aT6uhtwBnVsH2DwH9fwb/';
@@ -1198,9 +1173,7 @@ function renderUserSession(user) {
   loginView.classList.add('hidden');
   appShell.classList.remove('hidden');
 
-  // Close phone modal if open
-  document.getElementById('phone-modal')?.classList.add('hidden');
-
+  // Close any open overlays
   // Release WebGL/GPU resources when app shell is active
   unloadSpline();
 
@@ -1250,102 +1223,7 @@ const handleGoogleLogin = () => {
   });
 };
 
-// Handle Phone Auth
-function getRecaptchaVerifier() {
-  if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible'
-    });
-  }
-  return window.recaptchaVerifier;
-}
-
-const handleSendOtp = async () => {
-  const phoneInput = document.getElementById('phone-num-input');
-  const statusMsg = document.getElementById('phone-status-msg');
-  const sendBtn = document.getElementById('btn-send-otp');
-  const phone = phoneInput ? phoneInput.value.trim() : '';
-
-  if (!phone || phone.length < 8) {
-    if (statusMsg) {
-      statusMsg.className = 'phone-msg phone-msg-err';
-      statusMsg.textContent = 'Please enter a valid phone number with country code (e.g. +91 9876543210)';
-    }
-    return;
-  }
-
-  try {
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending OTP...'; }
-    if (statusMsg) { statusMsg.className = 'phone-msg'; statusMsg.textContent = ''; }
-
-    const verifier = getRecaptchaVerifier();
-    confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
-
-    document.getElementById('phone-step-1')?.classList.add('hidden');
-    document.getElementById('phone-step-2')?.classList.remove('hidden');
-    const sentSub = document.getElementById('otp-sent-sub');
-    if (sentSub) sentSub.textContent = `OTP code sent to ${phone}`;
-  } catch (err) {
-    console.error("Phone auth error:", err);
-    if (statusMsg) {
-      statusMsg.className = 'phone-msg phone-msg-err';
-      statusMsg.textContent = err.message || 'Failed to send OTP. Please try again.';
-    }
-    // Fallback: If SMS fails in test env, allow demo verification
-    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send OTP \u2192'; }
-  }
-};
-
-const handleVerifyOtp = async () => {
-  const otpInput = document.getElementById('otp-code-input');
-  const statusMsg = document.getElementById('otp-status-msg');
-  const verifyBtn = document.getElementById('btn-verify-otp');
-  const code = otpInput ? otpInput.value.trim() : '';
-
-  if (!code || code.length < 4) {
-    if (statusMsg) {
-      statusMsg.className = 'phone-msg phone-msg-err';
-      statusMsg.textContent = 'Please enter the verification code sent to your phone';
-    }
-    return;
-  }
-
-  try {
-    if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = 'Verifying...'; }
-    if (confirmationResult) {
-      const res = await confirmationResult.confirm(code);
-      renderUserSession(res.user);
-    } else {
-      // Demo fallback if confirmationResult is null
-      const phoneVal = document.getElementById('phone-num-input')?.value || '+91 98765 43210';
-      renderUserSession({ phoneNumber: phoneVal, displayName: `User ${phoneVal}` });
-    }
-  } catch (err) {
-    console.warn("OTP verification error:", err);
-    // Allow fallback entry for testing/demo numbers
-    const phoneVal = document.getElementById('phone-num-input')?.value || '+91 98765 43210';
-    renderUserSession({ phoneNumber: phoneVal, displayName: `User ${phoneVal}` });
-  }
-};
-
-// Phone Modal UI event bindings
-document.getElementById('btn-phone-modal-open')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  document.getElementById('phone-modal')?.classList.remove('hidden');
-});
-document.getElementById('btn-phone-modal-close')?.addEventListener('click', () => {
-  document.getElementById('phone-modal')?.classList.add('hidden');
-});
-document.getElementById('btn-send-otp')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  handleSendOtp();
-});
-document.getElementById('btn-verify-otp')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  handleVerifyOtp();
-});
-
-// Bind UI actions
+// Bind UI actions — Google Sign-In only
 document.getElementById('btn-login')?.addEventListener('click', (e) => { e.preventDefault(); handleGoogleLogin(); });
 document.getElementById('btn-login-hdr')?.addEventListener('click', (e) => { e.preventDefault(); handleGoogleLogin(); });
 document.getElementById('btn-login-final')?.addEventListener('click', (e) => { e.preventDefault(); handleGoogleLogin(); });
