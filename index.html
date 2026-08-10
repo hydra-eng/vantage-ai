@@ -646,15 +646,40 @@
     <button class="sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">&#9776;</button>
   </div>
   <div class="hdr-ctx">AI Spend Control &middot; TechCorp India Pvt. Ltd.</div>
-  <div class="hdr-sync">Synced 3 min ago</div>
-  <button class="hdr-theme-toggle" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
-    <span id="theme-toggle-icon">&#9790;</span> <span id="theme-toggle-lbl">Dark</span>
+  <a href="#view-overview" class="skip-link" id="skip-to-content">Skip to main content</a>
+  <div class="hdr-sync" id="hdr-sync-lbl" role="status" aria-live="polite">Synced 3 min ago</div>
+  <!-- Theme toggle pill -->
+  <button class="theme-pill" id="btn-theme-toggle" title="Toggle theme (T)" aria-label="Toggle light/dark theme">
+    <span class="theme-pill-track">
+      <span class="theme-pill-thumb" id="theme-pill-thumb">
+        <!-- Moon icon (dark) -->
+        <svg id="icon-moon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <!-- Sun icon (light) -->
+        <svg id="icon-sun" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:none">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="theme-pill-label" id="theme-pill-label">Dark</span>
+    </span>
   </button>
-  <div class="hdr-user">
-    <div class="u-av">IT</div>
-    <span>IT Admin</span>
+  <div class="hdr-user" id="hdr-user-block">
+    <div class="u-av" id="hdr-av">IT</div>
+    <span id="hdr-user-name">IT Admin</span>
   </div>
 </header>
+
+<!-- Progress bar for async ops (PDF, exports) -->
+<div id="pdf-progress-bar" role="progressbar" aria-label="Generating report" aria-valuenow="0" aria-valuemax="100"></div>
 
 <!-- SIDE NAV -->
 <nav id="nav" role="navigation" aria-label="Main navigation">
@@ -667,6 +692,14 @@
   </button>
   <button class="ni" data-view="providers" id="ni-providers">
     <span class="ni-icon">◈</span><span class="ni-lbl">Providers</span>
+  </button>
+  <button class="ni" data-view="telemetry" id="ni-telemetry">
+    <span class="ni-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </span>
+    <span class="ni-lbl">Telemetry Ledger</span>
   </button>
   <div class="nav-div"></div>
   <div class="nav-grp-lbl">Manage</div>
@@ -684,6 +717,11 @@
     <span class="ni-icon">◈</span><span class="ni-lbl">Settings &amp; Profile</span>
   </button>
   <div class="nav-foot">
+    <button class="ni ni-shortcuts" id="btn-show-shortcuts" style="font-size:12px;color:#6f6f6f;gap:8px;" title="Keyboard shortcuts (?)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+      <span class="ni-lbl" style="font-size:11px;">Shortcuts</span>
+      <kbd style="margin-left:auto;font-size:9px;padding:1px 4px;opacity:0.5">?</kbd>
+    </button>
     <div class="nav-foot-user" style="display:flex; justify-content:space-between; align-items:center; width:100%">
       <div style="display:flex; align-items:center; gap:10px">
         <div class="u-av u-av-sm">IT</div>
@@ -706,8 +744,35 @@
         <p class="vh-sub">July 2026 · 22 employees · 15 providers connected</p>
       </div>
       <div class="vh-r">
-        <button class="btn btn-secondary btn-sm" id="btn-export-csv">Export CSV</button>
-        <button class="btn btn-primary btn-sm" data-view="add-integration">+ Add Provider</button>
+        <div class="action-toolbar">
+          <!-- Report split button -->
+          <div class="report-split-wrap" id="report-split-wrap">
+            <button class="btn btn-primary btn-sm" id="btn-generate-report" data-pdf-trigger aria-haspopup="true" aria-expanded="false">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              Generate Report
+              <svg class="chevron-down" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="report-dropdown hidden" id="report-dropdown" role="menu">
+              <button class="rd-item" id="rd-exec-pdf" data-pdf-trigger role="menuitem">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                Executive PDF <span class="rd-hint">Ctrl+Shift+P</span>
+              </button>
+              <button class="rd-item" id="btn-export-csv" role="menuitem">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+              <div class="rd-sep"></div>
+              <button class="rd-item rd-item-dim" id="rd-scheduled" role="menuitem" disabled>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Scheduled Reports <span class="rd-badge">Soon</span>
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" data-view="add-integration">+ Add Provider</button>
+        </div>
       </div>
     </div>
 
@@ -1121,6 +1186,80 @@
     </div>
   </section>
 
+  <!-- ═══ VIEW 7: TELEMETRY LEDGER ════════════════════════ -->
+  <section id="view-telemetry" class="view">
+    <div class="vh">
+      <div class="vh-l">
+        <h1 class="vh-title">Telemetry Ledger</h1>
+        <p class="vh-sub">Raw API call log &middot; July 2026 &middot; <span id="telem-row-count">15</span> transactions</p>
+      </div>
+      <div class="vh-r">
+        <button class="btn btn-primary btn-sm" id="btn-telem-pdf" data-pdf-trigger>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          Export PDF Report
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btn-telem-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="fbar">
+      <div class="fbar-search-wrap">
+        <svg class="fbar-search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="fbar-search" id="telem-search" placeholder="Search employee ID, provider, model..." aria-label="Search telemetry" />
+      </div>
+      <select class="fbar-sel" id="telem-filter-provider" aria-label="Filter by provider">
+        <option value="">All providers</option>
+        <option value="OpenAI">OpenAI</option>
+        <option value="Anthropic">Anthropic</option>
+        <option value="Google">Google</option>
+        <option value="Runway ML">Runway ML</option>
+        <option value="GitHub">GitHub Copilot</option>
+        <option value="Synthesia">Synthesia</option>
+      </select>
+      <select class="fbar-sel" id="telem-filter-policy" aria-label="Filter by policy status">
+        <option value="">All statuses</option>
+        <option value="Normal">Normal</option>
+        <option value="Warning">Warning</option>
+        <option value="Hard Cap">Hard Cap</option>
+      </select>
+      <select class="fbar-sel" id="telem-filter-loop" aria-label="Filter loop detection">
+        <option value="">All calls</option>
+        <option value="loop">Loop detected only</option>
+      </select>
+      <span class="fbar-count" id="telem-fbar-count">15 records</span>
+    </div>
+
+    <div class="tw-container">
+      <div class="tw">
+        <table class="cdt" id="telem-table" aria-label="Raw telemetry ledger">
+          <thead>
+            <tr>
+              <th style="width:145px">Timestamp</th>
+              <th style="width:110px">Employee ID</th>
+              <th style="width:110px">Team</th>
+              <th style="width:95px">Provider</th>
+              <th style="width:155px">Model</th>
+              <th class="ra" style="width:105px">Prompt Tok</th>
+              <th class="ra" style="width:120px">Completion Tok</th>
+              <th class="ra" style="width:105px">Cost (₹)</th>
+              <th style="width:85px">Policy</th>
+              <th style="width:75px" title="Loop Detection: completion÷prompt ratio &gt; 8×">Loop?</th>
+            </tr>
+          </thead>
+          <tbody id="telem-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="telem-legend">
+      <span class="tl-item tl-normal">&#9632; Normal &lt;80%</span>
+      <span class="tl-item tl-warn">&#9632; Warning &#8805;80%</span>
+      <span class="tl-item tl-hard">&#9632; Hard Cap &#8805;100%</span>
+      <span class="tl-sep">&middot;</span>
+      <span class="tl-item tl-loop">&#9888; Loop: completion / prompt ratio &gt; 8&times;</span>
+    </div>
+  </section>
+
 <!-- EMPLOYEE DETAIL SIDE PANEL (inside app-shell) -->
 <aside id="emp-panel" role="complementary" aria-label="Employee detail">
   <div class="sp-head">
@@ -1138,7 +1277,104 @@
 </main>
 </div><!-- /#app-shell -->
 
+<!-- Toast notification container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
+<!-- ── KEYBOARD SHORTCUTS PANEL ── -->
+<div id="shortcuts-panel" class="shortcuts-panel hidden" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+  <div class="sp-overlay" id="sp-overlay"></div>
+  <div class="sp-card">
+    <div class="sp-card-hdr">
+      <span class="sp-card-title">Keyboard Shortcuts</span>
+      <button class="sp-card-close" id="btn-shortcuts-close" aria-label="Close shortcuts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sp-card-body">
+      <div class="sc-group">
+        <div class="sc-group-lbl">Reports &amp; Exports</div>
+        <div class="sc-row"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd><span>Generate Executive PDF</span></div>
+        <div class="sc-row"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>E</kbd><span>Export CSV</span></div>
+      </div>
+      <div class="sc-group">
+        <div class="sc-group-lbl">Navigation — press <kbd>G</kbd> then…</div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>O</kbd><span>Overview</span></div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>E</kbd><span>Employees</span></div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>P</kbd><span>Providers</span></div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>B</kbd><span>Budgets &amp; Alerts</span></div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>T</kbd><span>Telemetry Ledger</span></div>
+        <div class="sc-row"><kbd>G</kbd><span class="sc-then">then</span><kbd>S</kbd><span>Settings</span></div>
+      </div>
+      <div class="sc-group">
+        <div class="sc-group-lbl">Interface</div>
+        <div class="sc-row"><kbd>T</kbd><span>Toggle light / dark theme</span></div>
+        <div class="sc-row"><kbd>?</kbd><span>Open / close this panel</span></div>
+        <div class="sc-row"><kbd>Esc</kbd><span>Close any open panel</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PDF OPTIONS MODAL ── -->
+<div id="pdf-options-modal" class="pdf-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
+  <div class="pdf-modal-box">
+    <div class="pdf-modal-hdr">
+      <div class="pdf-modal-hdr-left">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="pdf-modal-title" id="pdf-modal-title">Generate Executive Report</span>
+      </div>
+      <button class="pdf-modal-close" id="btn-pdf-modal-close" aria-label="Close dialog">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="pdf-modal-body">
+      <div class="pdf-field">
+        <label class="pdf-label" for="pdf-period">Billing Period</label>
+        <select class="pdf-select" id="pdf-period">
+          <option value="July 2026">July 2026 (current)</option>
+          <option value="June 2026">June 2026</option>
+          <option value="Q2 FY2026 (Apr–Jun)">Q2 FY2026 (Apr–Jun)</option>
+          <option value="YTD FY2026">YTD FY2026 (Apr–Jul)</option>
+        </select>
+      </div>
+      <div class="pdf-field">
+        <label class="pdf-label" for="pdf-workspace">Workspace / Entity</label>
+        <input class="pdf-input" id="pdf-workspace" type="text" value="TechCorp India Pvt. Ltd." />
+      </div>
+      <div class="pdf-field">
+        <label class="pdf-label" for="pdf-sig-name">Signatory Name <span class="pdf-label-hint">(CFO sign-off line)</span></label>
+        <input class="pdf-input" id="pdf-sig-name" type="text" placeholder="Optional — leave blank for blank line" />
+      </div>
+      <div class="pdf-field pdf-field-check">
+        <label class="pdf-check-label">
+          <input type="checkbox" id="pdf-include-appendix" checked />
+          <span class="pdf-check-txt">Include Telemetry Appendix (Page 2+, Landscape)</span>
+        </label>
+      </div>
+      <div class="pdf-preview-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Report will be downloaded as a PDF. Data reflects current dashboard state.
+      </div>
+    </div>
+    <div class="pdf-modal-ftr">
+      <button class="btn btn-secondary" id="btn-pdf-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-pdf-confirm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- jsPDF CDN (loaded before our module) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<!-- PDF Export module — exposes exportVantagePDF to window -->
+<script type="module">
+  import { exportVantagePDF } from './pdf-export.js';
+  window.exportVantagePDF = exportVantagePDF;
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -1324,35 +1560,236 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// ── Theme Switcher Controller (Dark / Light Mode) ─────────────────────────
-function initTheme() {
-  const savedTheme = localStorage.getItem('vantage_theme') || 'dark';
-  applyTheme(savedTheme);
-}
-
+// ── Theme Switcher — SVG Pill Toggle ──────────────────────────────────────
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('vantage_theme', theme);
-  const iconEl = document.getElementById('theme-toggle-icon');
-  const lblEl = document.getElementById('theme-toggle-lbl');
+  const moonEl = document.getElementById('icon-moon');
+  const sunEl  = document.getElementById('icon-sun');
+  const lblEl  = document.getElementById('theme-pill-label');
   if (theme === 'light') {
-    if (iconEl) iconEl.textContent = '☀️';
-    if (lblEl) lblEl.textContent = 'Light';
+    if (moonEl) moonEl.style.display = 'none';
+    if (sunEl)  sunEl.style.display  = '';
+    if (lblEl)  lblEl.textContent    = 'Light';
   } else {
-    if (iconEl) iconEl.textContent = '🌙';
-    if (lblEl) lblEl.textContent = 'Dark';
+    if (moonEl) moonEl.style.display = '';
+    if (sunEl)  sunEl.style.display  = 'none';
+    if (lblEl)  lblEl.textContent    = 'Dark';
   }
 }
-
+function initTheme() {
+  applyTheme(localStorage.getItem('vantage_theme') || 'dark');
+}
 document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-  const nextTheme = current === 'light' ? 'dark' : 'light';
-  applyTheme(nextTheme);
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  applyTheme(next);
 });
-
+// T key shortcut for theme
+document.addEventListener('keydown', (e) => {
+  if (e.key === 't' && !e.ctrlKey && !e.metaKey && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+  }
+});
 initTheme();
 
-// Auto-restore session if user refreshed while logged in
+// ── Telemetry Ledger Table Render ─────────────────────────────────────────
+const TELEMETRY_DATA = [
+  { ts:'2026-07-31 23:58', eid:'EMP-EN-001', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',           prompt:12400, completion:3820,  cost:7298,  policy:'Normal',   loop:false },
+  { ts:'2026-07-31 22:41', eid:'EMP-EN-002', team:'Engineering',  provider:'OpenAI',     model:'gpt-4-turbo',      prompt:8200,  completion:1100,  cost:9527,  policy:'Warning',  loop:false },
+  { ts:'2026-07-31 21:30', eid:'EMP-EN-011', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',           prompt:3800,  completion:31200, cost:41590, policy:'Hard Cap', loop:true  },
+  { ts:'2026-07-31 20:15', eid:'EMP-VD-003', team:'Video',        provider:'Runway ML',  model:'runway-gen3',      prompt:2100,  completion:890,   cost:4830,  policy:'Warning',  loop:false },
+  { ts:'2026-07-31 19:54', eid:'EMP-MK-007', team:'Marketing',    provider:'OpenAI',     model:'gpt-4o',           prompt:5400,  completion:1620,  cost:3244,  policy:'Normal',   loop:false },
+  { ts:'2026-07-31 18:30', eid:'EMP-PD-004', team:'Product',      provider:'Synthesia',  model:'synthesia-v2',     prompt:900,   completion:3600,  cost:8190,  policy:'Warning',  loop:false },
+  { ts:'2026-07-31 17:12', eid:'EMP-EN-005', team:'Engineering',  provider:'Anthropic',  model:'claude-3-5-sonnet',prompt:11200, completion:2840,  cost:6324,  policy:'Normal',   loop:false },
+  { ts:'2026-07-31 16:45', eid:'EMP-DA-002', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-pro',   prompt:18600, completion:4200,  cost:3243,  policy:'Normal',   loop:false },
+  { ts:'2026-07-31 15:30', eid:'EMP-OP-001', team:'Operations',   provider:'OpenAI',     model:'gpt-3.5-turbo',    prompt:22000, completion:5800,  cost:1279,  policy:'Normal',   loop:false },
+  { ts:'2026-07-31 14:10', eid:'EMP-EN-008', team:'Engineering',  provider:'GitHub',     model:'copilot-chat',     prompt:9800,  completion:2200,  cost:2185,  policy:'Hard Cap', loop:false },
+  { ts:'2026-07-31 13:55', eid:'EMP-MK-003', team:'Marketing',    provider:'ElevenLabs', model:'eleven-turbo-v2',  prompt:1200,  completion:4800,  cost:2810,  policy:'Normal',   loop:false },
+  { ts:'2026-07-30 22:30', eid:'EMP-VD-001', team:'Video',        provider:'Runway ML',  model:'runway-gen3',      prompt:1800,  completion:720,   cost:4153,  policy:'Warning',  loop:false },
+  { ts:'2026-07-30 20:15', eid:'EMP-EN-003', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',           prompt:6200,  completion:1880,  cost:4889,  policy:'Normal',   loop:false },
+  { ts:'2026-07-30 18:40', eid:'EMP-PD-002', team:'Product',      provider:'Anthropic',  model:'claude-3-haiku',   prompt:14400, completion:3600,  cost:677,   policy:'Normal',   loop:false },
+  { ts:'2026-07-30 16:20', eid:'EMP-DA-005', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-flash', prompt:42000, completion:8400,  cost:877,   policy:'Normal',   loop:false },
+];
+
+function policyBadge(policy) {
+  const cls = policy === 'Hard Cap' ? 'hardcap' : policy.toLowerCase();
+  return `<span class="badge-policy ${cls}">${policy}</span>`;
+}
+function loopBadge(loop) {
+  return loop ? `<span class="badge-loop">&#9888; LOOP</span>` : `<span style="color:var(--t3)">—</span>`;
+}
+function renderTelemTable(rows) {
+  const tbody = document.getElementById('telem-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--t2)">${r.ts}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--blue)">${r.eid}</td>
+      <td>${r.team}</td>
+      <td>${r.provider}</td>
+      <td style="font-family:var(--mono);font-size:12px">${r.model}</td>
+      <td class="ra" style="font-family:var(--mono)">${r.prompt.toLocaleString('en-IN')}</td>
+      <td class="ra" style="font-family:var(--mono)">${r.completion.toLocaleString('en-IN')}</td>
+      <td class="ra" style="font-family:var(--mono);font-weight:600">₹${r.cost.toLocaleString('en-IN')}</td>
+      <td>${policyBadge(r.policy)}</td>
+      <td style="text-align:center">${loopBadge(r.loop)}</td>
+    </tr>`).join('');
+  const countEl = document.getElementById('telem-fbar-count');
+  if (countEl) countEl.textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+  const rowCountEl = document.getElementById('telem-row-count');
+  if (rowCountEl) rowCountEl.textContent = rows.length;
+}
+
+function filterTelemTable() {
+  const search   = (document.getElementById('telem-search')?.value || '').toLowerCase();
+  const provider = document.getElementById('telem-filter-provider')?.value || '';
+  const policy   = document.getElementById('telem-filter-policy')?.value || '';
+  const loopOnly = document.getElementById('telem-filter-loop')?.value === 'loop';
+  const filtered = TELEMETRY_DATA.filter(r =>
+    (!search   || `${r.eid} ${r.provider} ${r.model} ${r.team}`.toLowerCase().includes(search)) &&
+    (!provider || r.provider.includes(provider)) &&
+    (!policy   || r.policy === policy) &&
+    (!loopOnly || r.loop)
+  );
+  renderTelemTable(filtered);
+}
+
+// Wire telemetry filters (using delegation after view is active)
+document.getElementById('telem-search')?.addEventListener('input', filterTelemTable);
+document.getElementById('telem-filter-provider')?.addEventListener('change', filterTelemTable);
+document.getElementById('telem-filter-policy')?.addEventListener('change', filterTelemTable);
+document.getElementById('telem-filter-loop')?.addEventListener('change', filterTelemTable);
+
+// Init telemetry table when view becomes active
+const origSwitchView = window.switchView;
+window.switchView = function(viewId) {
+  if (typeof origSwitchView === 'function') origSwitchView(viewId);
+  if (viewId === 'telemetry') renderTelemTable(TELEMETRY_DATA);
+};
+
+// ── Report Dropdown ───────────────────────────────────────────────────────
+const reportBtn   = document.getElementById('btn-generate-report');
+const reportDD    = document.getElementById('report-dropdown');
+const reportWrap  = document.getElementById('report-split-wrap');
+
+function openReportDD(e) {
+  e.stopPropagation();
+  const isOpen = !reportDD?.classList.contains('hidden');
+  reportDD?.classList.toggle('hidden', isOpen);
+  reportWrap?.classList.toggle('open', !isOpen);
+  reportBtn?.setAttribute('aria-expanded', String(!isOpen));
+}
+reportBtn?.addEventListener('click', (e) => {
+  // Show the PDF options modal instead of dropdown when clicking main area
+  openReportDD(e);
+});
+
+document.addEventListener('click', (e) => {
+  if (!reportWrap?.contains(e.target)) {
+    reportDD?.classList.add('hidden');
+    reportWrap?.classList.remove('open');
+    reportBtn?.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// Dropdown items
+document.getElementById('rd-exec-pdf')?.addEventListener('click', () => {
+  reportDD?.classList.add('hidden');
+  reportWrap?.classList.remove('open');
+  document.getElementById('pdf-options-modal')?.classList.remove('hidden');
+});
+document.getElementById('btn-export-csv')?.addEventListener('click', () => {
+  reportDD?.classList.add('hidden');
+  showToast('CSV exported — Vantage_Telemetry_Jul2026.csv', 'success');
+});
+document.getElementById('btn-telem-pdf')?.addEventListener('click', () => {
+  document.getElementById('pdf-options-modal')?.classList.remove('hidden');
+});
+
+// ── PDF Options Modal ─────────────────────────────────────────────────────
+function closePDFModal() {
+  document.getElementById('pdf-options-modal')?.classList.add('hidden');
+}
+document.getElementById('btn-pdf-modal-close')?.addEventListener('click', closePDFModal);
+document.getElementById('btn-pdf-cancel')?.addEventListener('click', closePDFModal);
+document.getElementById('pdf-options-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'pdf-options-modal') closePDFModal();
+});
+document.getElementById('btn-pdf-confirm')?.addEventListener('click', async () => {
+  closePDFModal();
+  const period    = document.getElementById('pdf-period')?.value || 'July 2026';
+  const workspace = document.getElementById('pdf-workspace')?.value || 'TechCorp India Pvt. Ltd.';
+  const sigName   = document.getElementById('pdf-sig-name')?.value || '';
+  const appendix  = document.getElementById('pdf-include-appendix')?.checked !== false;
+  if (window.exportVantagePDF) {
+    await window.exportVantagePDF({ period, workspace, sigName, includeAppendix: appendix });
+  } else {
+    showToast('PDF module loading… please try again in a moment.', 'error');
+  }
+});
+
+// ── Keyboard Shortcuts Panel ──────────────────────────────────────────────
+function closeShortcuts() {
+  document.getElementById('shortcuts-panel')?.classList.add('hidden');
+}
+document.getElementById('btn-shortcuts-close')?.addEventListener('click', closeShortcuts);
+document.getElementById('sp-overlay')?.addEventListener('click', closeShortcuts);
+
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement.tagName;
+  const noInput = !['INPUT','TEXTAREA','SELECT'].includes(tag);
+  // ? → shortcuts panel
+  if (e.key === '?' && noInput && !e.ctrlKey) {
+    document.getElementById('shortcuts-panel')?.classList.toggle('hidden');
+  }
+  // Esc → close everything
+  if (e.key === 'Escape') {
+    closeShortcuts();
+    closePDFModal();
+    reportDD?.classList.add('hidden');
+    reportWrap?.classList.remove('open');
+  }
+  // Ctrl+Shift+P → PDF
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+    e.preventDefault();
+    if (!document.getElementById('app-shell')?.classList.contains('hidden')) {
+      document.getElementById('pdf-options-modal')?.classList.remove('hidden');
+    }
+  }
+  // Ctrl+Shift+E → CSV
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'E') {
+    e.preventDefault();
+    showToast('CSV exported — Vantage_Telemetry_Jul2026.csv', 'success');
+  }
+  // G + nav key chord
+  if (e.key === 'g' && noInput && !e.ctrlKey && !e.metaKey) {
+    window._navChord = true;
+    clearTimeout(window._navChordTimer);
+    window._navChordTimer = setTimeout(() => { window._navChord = false; }, 1500);
+  }
+  if (window._navChord && noInput) {
+    const map = { o:'overview', e:'employees', b:'budgets', p:'providers', s:'settings', t:'telemetry' };
+    if (map[e.key.toLowerCase()]) {
+      window._navChord = false;
+      const target = document.querySelector(`[data-view="${map[e.key.toLowerCase()]}"]`);
+      target?.click();
+    }
+  }
+});
+
+// ── Toast helper (global) ────────────────────────────────────────────────
+window.showToast = function(msg, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => { t.remove(); }, 4200);
+};
+
+// ── Auto-restore session ───────────────────────────────────────────────────
 if (sessionStorage.getItem('vantage_active_session') === 'true') {
   renderUserSession();
 }
