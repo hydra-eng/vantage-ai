@@ -857,7 +857,7 @@ function finishProgress() {
 /* ═══════════════════════════════════════════════════════════
    MAIN EXPORT ENTRY POINT
 ═══════════════════════════════════════════════════════════ */
-export async function exportVantagePDF(options = {}) {
+window.exportVantagePDF = async function exportVantagePDF(options = {}) {
   const opts = {
     period:          options.period          || 'July 2026',
     workspace:       options.workspace       || CO.name,
@@ -865,8 +865,10 @@ export async function exportVantagePDF(options = {}) {
     includeAppendix: options.includeAppendix !== false,
   };
 
-  if (!window.jspdf?.jsPDF) {
-    window.showToast?.('PDF library not loaded — please refresh and retry.', 'error');
+  // Support both UMD exposure styles across CDN versions
+  const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if (!JsPDF) {
+    window.showToast?.('PDF library not loaded — please refresh (Ctrl+Shift+R) and retry.', 'error');
     return;
   }
 
@@ -883,10 +885,10 @@ export async function exportVantagePDF(options = {}) {
   await new Promise(r => setTimeout(r, 60));
 
   try {
-    const { jsPDF } = window.jspdf;
+    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
 
     /* All 3 sheets — Portrait A4 */
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     buildSheet1(doc, opts);
 
     doc.addPage([210, 297], 'portrait');

@@ -1361,15 +1361,12 @@
   </div>
 </div>
 
-<!-- jsPDF CDN (loaded before our module) -->
+<!-- jsPDF CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- PDF Export — plain script (no module boundary, runs after CDN) -->
+<script src="./pdf-export.js" defer></script>
 
-<!-- PDF Export module — exposes exportVantagePDF to window -->
-<script type="module">
-  import { exportVantagePDF } from './pdf-export.js';
-  window.exportVantagePDF = exportVantagePDF;
-</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
