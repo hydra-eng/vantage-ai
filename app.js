@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // INR — Indian number formatting (en-IN locale)
 // ₹1,12,430 — lakh/crore grouping, IBM Plex Mono in UI
 // ============================================================
@@ -791,7 +791,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// CANVAS SCROLL HERO ENGINE (192 FRAMES SEQUENCE)
+// CANVAS SCROLL HERO ENGINE — 5-CHAPTER CINEMATIC (192 FRAMES)
 // ============================================================
 (function initCanvasHeroEngine() {
   const TOTAL_FRAMES = 192;
@@ -799,55 +799,52 @@ document.addEventListener('click', (e) => {
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
-  const loaderEl = document.getElementById('hero-loader');
+  const loaderEl  = document.getElementById('hero-loader');
   const loaderFill = document.getElementById('hero-loader-fill');
-  const loaderText = document.getElementById('hero-loader-text');
-  const frameTextEl = document.getElementById('hero-frame-text');
-  const container = document.getElementById('hero-scroll-sec');
+  const scrollCue  = document.getElementById('hero-scroll-cue');
+  const container  = document.getElementById('hero-scroll-sec');
 
-  const stage1 = document.getElementById('hero-stage-1');
-  const stage2 = document.getElementById('hero-stage-2');
-  const stage3 = document.getElementById('hero-stage-3');
-  const stage4 = document.getElementById('hero-stage-4');
+  // Chapter stage elements (5 now)
+  const stages = [1,2,3,4,5].map(n => document.getElementById(`hero-stage-${n}`));
+
+  // Frame boundaries per chapter (frame index 0-based)
+  // Chapter 1: frames 0–37  (38 frames)
+  // Chapter 2: frames 38–75 (38 frames)
+  // Chapter 3: frames 76–114 (39 frames)
+  // Chapter 4: frames 115–153 (39 frames)
+  // Chapter 5: frames 154–191 (38 frames)
+  const CHAPTER_STARTS = [0, 38, 76, 115, 154, 192];
 
   const frames = [];
   let loadedCount = 0;
-  let animationFrameId = null;
 
   function pad(num, size) {
-    let s = num + "";
-    while (s.length < size) s = "0" + s;
+    let s = num + '';
+    while (s.length < size) s = '0' + s;
     return s;
   }
 
-  // Preload images asynchronously
+  // Preload all 192 frames
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
     const img = new Image();
     const frameNum = pad(i, 3);
-    const primarySrc = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
-    const fallbackSrc = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
-
-    img.src = primarySrc;
+    const primary  = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+    const fallback = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+    img.src = primary;
     img.onload = () => {
       loadedCount++;
       const pct = Math.min(100, Math.floor((loadedCount / TOTAL_FRAMES) * 100));
       if (loaderFill) loaderFill.style.width = pct + '%';
-      if (loaderText) loaderText.textContent = `INITIALIZING TELEMETRY ENGINE... [${pct}%]`;
-      
-      // Render Frame 0 as soon as available
-      if (i === 1) {
-        renderFrame(0);
-      }
-      
+      if (i === 1) renderFrame(0);
       if (loadedCount >= TOTAL_FRAMES) {
         setTimeout(() => {
           if (loaderEl) loaderEl.classList.add('hidden-overlay');
-        }, 200);
+        }, 250);
       }
     };
     img.onerror = () => {
       if (img.src.includes('images sequence -jpg/') && !img.src.includes('public/')) {
-        img.src = fallbackSrc;
+        img.src = fallback;
       } else {
         loadedCount++;
       }
@@ -855,125 +852,128 @@ document.addEventListener('click', (e) => {
     frames.push(img);
   }
 
-  // Responsive object-fit: cover drawing
+  // Object-fit: cover drawing
   function renderFrame(index) {
     const img = frames[index];
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr  = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    
     if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-      canvas.width = rect.width * dpr;
+      canvas.width  = rect.width * dpr;
       canvas.height = rect.height * dpr;
     }
 
+    const cW = rect.width, cH = rect.height;
+    const iW = img.naturalWidth, iH = img.naturalHeight;
+    const scale = Math.max(cW / iW, cH / iH);
+    const x = (cW - iW * scale) / 2;
+    const y = (cH - iH * scale) / 2;
+
     ctx.save();
     ctx.scale(dpr, dpr);
-
-    const cWidth = rect.width;
-    const cHeight = rect.height;
-    const iWidth = img.naturalWidth;
-    const iHeight = img.naturalHeight;
-
-    const scale = Math.max(cWidth / iWidth, cHeight / iHeight);
-    const x = (cWidth - iWidth * scale) / 2;
-    const y = (cHeight - iHeight * scale) / 2;
-
-    ctx.clearRect(0, 0, cWidth, cHeight);
-    ctx.drawImage(img, x, y, iWidth * scale, iHeight * scale);
+    ctx.clearRect(0, 0, cW, cH);
+    ctx.drawImage(img, x, y, iW * scale, iH * scale);
     ctx.restore();
   }
 
-  let targetFrameIndex = 0;
+  let targetFrameIndex  = 0;
   let currentFrameIndex = 0;
   let lastRenderedFrame = -1;
 
-  // Apply parallax translation to text & layout cards
-  function applyParallax(frameIdx) {
-    if (stage1) {
-      const p1 = Math.max(0, Math.min(1, frameIdx / 48));
-      const y1 = p1 * -100;
-      const op1 = Math.max(0, 1 - (frameIdx - 35) / 15);
-      stage1.style.transform = `translate3d(0, ${y1}px, 0)`;
-      stage1.style.opacity = frameIdx > 48 ? '0' : String(op1);
-    }
-    if (stage2) {
-      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 45) / 60));
-      const y2 = (1 - stageProgress) * 70 - stageProgress * 70;
-      stage2.style.transform = `translate3d(0, ${y2}px, 0)`;
-    }
-    if (stage3) {
-      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 105) / 50));
-      const y3 = (1 - stageProgress) * 70 - stageProgress * 70;
-      stage3.style.transform = `translate3d(0, ${y3}px, 0)`;
-    }
-    if (stage4) {
-      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 155) / 36));
-      const y4 = (1 - stageProgress) * 70;
-      stage4.style.transform = `translate3d(0, ${y4}px, 0)`;
-    }
+  // Smooth parallax per-chapter
+  function applyParallax(fi) {
+    stages.forEach((stage, i) => {
+      if (!stage) return;
+      const chStart = CHAPTER_STARTS[i];
+      const chEnd   = CHAPTER_STARTS[i + 1];
+      const chLen   = chEnd - chStart;
+
+      const localProgress = Math.max(0, Math.min(1, (fi - chStart) / chLen));
+      // Slide in from below on entry, slide out upward on exit
+      const entryProgress = Math.max(0, Math.min(1, (fi - chStart) / 12));  // 12 frames to settle
+      const exitProgress  = Math.max(0, Math.min(1, (fi - (chEnd - 12)) / 12)); // 12 frames to leave
+
+      const yIn  = (1 - entryProgress) * 50;
+      const yOut = exitProgress * -60;
+      const y    = yIn + yOut;
+
+      const opIn  = Math.min(1, entryProgress);
+      const opOut = Math.max(0, 1 - exitProgress);
+      const opacity = opIn * opOut;
+
+      stage.style.transform = `translate3d(0, ${y}px, 0)`;
+      stage.style.opacity   = String(Math.max(0, Math.min(1, opacity)));
+    });
   }
 
-  // Smooth Lerp Scrubbing Loop
+  // Determine which chapter is active
+  function updateActiveStage(fi) {
+    const chapterIndex = CHAPTER_STARTS.findIndex((start, i) =>
+      fi >= start && fi < CHAPTER_STARTS[i + 1]
+    );
+    stages.forEach((stage, i) => {
+      if (!stage) return;
+      stage.classList.toggle('stage-active', i === chapterIndex);
+    });
+  }
+
+  // Scroll cue fades out after first 15 frames
+  function updateScrollCue(fi) {
+    if (!scrollCue) return;
+    const opacity = Math.max(0, 1 - fi / 15);
+    scrollCue.style.opacity = String(opacity);
+  }
+
+  // Lerp tick loop — 0.16 for cinematic feel
   function tickLoop() {
     if (Math.abs(targetFrameIndex - currentFrameIndex) > 0.01) {
-      currentFrameIndex += (targetFrameIndex - currentFrameIndex) * 0.22;
+      currentFrameIndex += (targetFrameIndex - currentFrameIndex) * 0.16;
       const roundedFrame = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.floor(currentFrameIndex)));
-      
       if (roundedFrame !== lastRenderedFrame) {
         lastRenderedFrame = roundedFrame;
         renderFrame(roundedFrame);
-        if (frameTextEl) {
-          frameTextEl.textContent = `FRAME ${pad(roundedFrame + 1, 3)} / 192 • TELEMETRY ENGINE`;
-        }
       }
-
-      // Stage active state toggling
-      if (stage1) stage1.classList.toggle('stage-active', roundedFrame <= 48);
-      if (stage2) stage2.classList.toggle('stage-active', roundedFrame > 48 && roundedFrame <= 105);
-      if (stage3) stage3.classList.toggle('stage-active', roundedFrame > 105 && roundedFrame <= 155);
-      if (stage4) stage4.classList.toggle('stage-active', roundedFrame > 155);
-
+      updateActiveStage(roundedFrame);
       applyParallax(currentFrameIndex);
+      updateScrollCue(currentFrameIndex);
     }
     requestAnimationFrame(tickLoop);
   }
   requestAnimationFrame(tickLoop);
 
-  // Scroll listener & threshold calculation
+  // Scroll → frame mapping
   function updateScroll() {
     if (!container) return;
     const rect = container.getBoundingClientRect();
     const scrollableDistance = container.offsetHeight - window.innerHeight;
-    
     if (scrollableDistance <= 0) return;
-
-    // Calculate progress 0 to 1 relative to viewport container
-    const rawProgress = (-rect.top) / scrollableDistance;
-    const progress = Math.max(0, Math.min(1, rawProgress));
-
+    const progress = Math.max(0, Math.min(1, (-rect.top) / scrollableDistance));
     targetFrameIndex = Math.min(TOTAL_FRAMES - 1, progress * (TOTAL_FRAMES - 1));
   }
 
-  function onScroll() {
-    updateScroll();
+  // Wire btn-login-final to the same Google login flow
+  const btnFinal = document.getElementById('btn-login-final');
+  if (btnFinal) {
+    btnFinal.addEventListener('click', () => {
+      const btnLogin = document.getElementById('btn-login');
+      if (btnLogin) btnLogin.click();
+    });
   }
 
-  // Bind scroll listeners to window, document, AND fixed landing-page container (#login-view)
   const loginView = document.getElementById('login-view');
-  if (loginView) {
-    loginView.addEventListener('scroll', onScroll, { passive: true });
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  document.addEventListener('scroll', onScroll, { passive: true });
+  if (loginView) loginView.addEventListener('scroll', updateScroll, { passive: true });
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  document.addEventListener('scroll', updateScroll, { passive: true });
   window.addEventListener('resize', () => {
     updateScroll();
     renderFrame(Math.floor(currentFrameIndex));
   }, { passive: true });
-  
+
   updateScroll();
 })();
+
+
 
 // ============================================================
 // INIT
