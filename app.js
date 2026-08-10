@@ -730,15 +730,22 @@ function renderBudgets(){
 }
 
 let activeAlertFilter = 'all';
+let targetAlertForRevoke = null;
+let targetAlertForAdjust = null;
+
 function renderAlerts(filter = activeAlertFilter){
   activeAlertFilter = filter;
   const el=document.getElementById('ba-alerts');if(!el)return;
   const list = alerts.filter(a => filter === 'all' || a.sev === filter);
+  if (list.length === 0) {
+    el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:8px">No active alerts match this filter.</div>`;
+    return;
+  }
   el.innerHTML=list.map(a=>{
     const cls=a.sev==='critical'?'ai-icon-err':'ai-icon-warn';
     const tcls=a.sev==='critical'?'ai-title-err':'ai-title-warn';
     const icon=a.sev==='critical'?'◬':'⚠';
-    return `<div class="alert-item" data-sev="${a.sev}">
+    return `<div class="alert-item" data-sev="${a.sev}" data-alert-id="${a.id}">
       <div class="ai-icon ${cls}">${icon}</div>
       <div class="ai-bd">
         <div class="ai-title ${tcls}">${a.title}</div>
@@ -746,10 +753,10 @@ function renderAlerts(filter = activeAlertFilter){
         <div class="ai-meta">${timeAgo(a.when)}</div>
       </div>
       <div class="ai-acts">
-        <button class="btn btn-secondary btn-sm btn-dismiss-alert">Dismiss</button>
-        ${a.actions.includes('revoke')?`<button class="btn btn-primary btn-danger btn-sm">Revoke Key</button>`:''}
-        ${a.actions.includes('review')?`<button class="btn btn-primary btn-sm">Review Logs</button>`:''}
-        ${a.actions.includes('adjust')?`<button class="btn btn-primary btn-sm">Adjust Limit</button>`:''}
+        <button class="btn btn-secondary btn-sm btn-dismiss-alert" data-alert-id="${a.id}">Dismiss</button>
+        ${a.actions.includes('revoke')?`<button class="btn btn-primary btn-danger btn-sm btn-revoke-key" data-alert-id="${a.id}">Revoke Key</button>`:''}
+        ${a.actions.includes('review')?`<button class="btn btn-primary btn-sm btn-review-logs" data-alert-id="${a.id}">Review Logs</button>`:''}
+        ${a.actions.includes('adjust')?`<button class="btn btn-primary btn-sm btn-adjust-limit" data-alert-id="${a.id}">Adjust Limit</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -762,6 +769,107 @@ document.querySelectorAll('.chip[data-filter]').forEach(chip => {
     chip.classList.add('on');
     renderAlerts(chip.dataset.filter);
   });
+});
+
+// ============================================================
+// ALERT ACTIONS: REVOKE KEY, REVIEW LOGS, ADJUST LIMIT
+// ============================================================
+document.addEventListener('click', (e) => {
+  const target = e.target;
+
+  // 1. Revoke Key Click
+  const revokeBtn = target.closest('.btn-revoke-key');
+  if (revokeBtn) {
+    e.preventDefault();
+    const alertId = revokeBtn.dataset.alertId;
+    targetAlertForRevoke = alerts.find(a => a.id === alertId) || alerts[0];
+    const modal = document.getElementById('revoke-key-modal');
+    const msgEl = document.getElementById('revoke-modal-msg');
+    if (msgEl && targetAlertForRevoke) {
+      msgEl.innerHTML = `Are you sure you want to revoke API key access for <strong>${targetAlertForRevoke.title}</strong>?`;
+    }
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  // Confirm Revocation
+  if (target.id === 'btn-confirm-revoke') {
+    e.preventDefault();
+    if (targetAlertForRevoke) {
+      const idx = alerts.findIndex(a => a.id === targetAlertForRevoke.id);
+      if (idx !== -1) alerts.splice(idx, 1);
+    }
+    renderAlerts();
+    const modal = document.getElementById('revoke-key-modal');
+    if (modal) modal.classList.add('hidden');
+    showToast("API key revoked & security policy updated", "success");
+  }
+
+  // Close Revoke Modal
+  if (target.id === 'btn-close-revoke-modal' || target.id === 'btn-cancel-revoke') {
+    e.preventDefault();
+    const modal = document.getElementById('revoke-key-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // 2. Review Logs Click
+  const reviewBtn = target.closest('.btn-review-logs');
+  if (reviewBtn) {
+    e.preventDefault();
+    // Navigate directly to Telemetry Ledger view or open employee side panel
+    const alertId = reviewBtn.dataset.alertId;
+    const a = alerts.find(x => x.id === alertId);
+    if (a && a.id === 'a2') {
+      openSidePanel('emp-en-003');
+    } else {
+      switchView('telemetry');
+    }
+    showToast("Navigated to Telemetry Logs", "info");
+  }
+
+  // 3. Adjust Limit Click
+  const adjustBtn = target.closest('.btn-adjust-limit');
+  if (adjustBtn) {
+    e.preventDefault();
+    const alertId = adjustBtn.dataset.alertId;
+    targetAlertForAdjust = alerts.find(a => a.id === alertId) || alerts[0];
+    const modal = document.getElementById('adjust-limit-modal');
+    const msgEl = document.getElementById('adjust-modal-target');
+    if (msgEl && targetAlertForAdjust) {
+      msgEl.innerHTML = `Adjust limit for <strong>${targetAlertForAdjust.title}</strong>:`;
+    }
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  // Confirm Adjust Limit
+  if (target.id === 'btn-confirm-adjust') {
+    e.preventDefault();
+    const inputVal = document.getElementById('adjust-budget-input')?.value || 150000;
+    const newLimit = parseInt(inputVal, 10);
+    if (targetAlertForAdjust) {
+      const idx = alerts.findIndex(a => a.id === targetAlertForAdjust.id);
+      if (idx !== -1) alerts.splice(idx, 1);
+    }
+    renderAlerts();
+    renderBudgets();
+    const modal = document.getElementById('adjust-limit-modal');
+    if (modal) modal.classList.add('hidden');
+    showToast("Budget limit updated to ₹" + newLimit.toLocaleString('en-IN'), "success");
+  }
+
+  // Close Adjust Modal
+  if (target.id === 'btn-close-adjust-modal' || target.id === 'btn-cancel-adjust') {
+    e.preventDefault();
+    const modal = document.getElementById('adjust-limit-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Save Alert Policy Rules Click
+  if (target.id === 'btn-save-alert-policy') {
+    e.preventDefault();
+    const softCap = document.getElementById('policy-soft-cap')?.value || 80;
+    const action = document.getElementById('policy-hard-action')?.value || 'revoke';
+    showToast(`Policy saved: Soft Cap ${softCap}%, Hard Cap action: ${action.toUpperCase()}`, "success");
+  }
 });
 
 // ============================================================

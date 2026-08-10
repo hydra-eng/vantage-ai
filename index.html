@@ -1137,6 +1137,45 @@
       </div>
       <div id="ba-alerts" class="alerts-container"></div>
     </div>
+
+    <!-- ═══ ALERT POLICY CONFIGURATION CARD ═══ -->
+    <div class="ba-section" style="margin-top:24px;padding:24px;background:var(--bg2);border:1px solid var(--border);border-radius:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <h3 style="font-size:15px;font-weight:600;color:var(--t1)">Alert Policy & Automated Enforcement Rules</h3>
+          <p style="font-size:12px;color:var(--t2);margin-top:2px">Configure auto-revocation, model fallbacks, and real-time alert dispatch thresholds</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-save-alert-policy">Save Policy Rules</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+        <div class="ff-field">
+          <label class="ff-lbl">Soft Cap Alert Threshold (%)</label>
+          <input type="number" class="ff-inp" id="policy-soft-cap" value="80" min="50" max="95" />
+          <span style="font-size:11px;color:var(--t3)">Fires Slack & email warnings to team leads when spend hits target %</span>
+        </div>
+        <div class="ff-field">
+          <label class="ff-lbl">Hard Cap Enforcement Action</label>
+          <select class="ff-inp" id="policy-hard-action">
+            <option value="revoke">Revoke API Key & Notify CISO</option>
+            <option value="fallback">Auto-fallback to Low-Cost Models (Flash / Haiku)</option>
+            <option value="block">Block HTTP Requests (Return 403 Hard Cap)</option>
+          </select>
+          <span style="font-size:11px;color:var(--t3)">Action taken when employee reaches 100% monthly budget</span>
+        </div>
+        <div class="ff-field">
+          <label class="ff-lbl">Notification Dispatch Channels</label>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <label style="font-size:12px;color:var(--t1);display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="pol-chan-slack" checked /> Slack (#finops-alerts)
+            </label>
+            <label style="font-size:12px;color:var(--t1);display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="pol-chan-email" checked /> Email Digest
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ═══ VIEW 7: SETTINGS & PROFILE ═══════════════════ -->
@@ -1369,6 +1408,59 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download PDF
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REVOKE KEY MODAL ── -->
+<div id="revoke-key-modal" class="pdf-modal-overlay hidden" role="dialog" aria-modal="true">
+  <div class="pdf-modal-box" style="max-width:440px">
+    <div class="pdf-modal-hdr" style="background:#da1e28;color:#fff">
+      <div class="pdf-modal-hdr-left">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="pdf-modal-title" style="color:#fff">Revoke API Key Access</span>
+      </div>
+      <button class="pdf-modal-close" id="btn-close-revoke-modal" style="color:#fff">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="pdf-modal-body">
+      <p style="font-size:13px;color:var(--t1);line-height:1.5;margin-bottom:12px" id="revoke-modal-msg">
+        Are you sure you want to revoke API key access for <strong id="revoke-modal-target">OpenAI / Sora</strong>?
+      </p>
+      <div style="background:rgba(218,30,40,0.08);border:1px solid rgba(218,30,40,0.2);padding:12px;border-radius:6px;font-size:12px;color:#da1e28">
+        <strong>Warning:</strong> The API key will be immediately deactivated at the proxy level. Active agentic pipelines using this key will be terminated.
+      </div>
+    </div>
+    <div class="pdf-modal-ftr">
+      <button class="btn btn-secondary" id="btn-cancel-revoke">Cancel</button>
+      <button class="btn btn-primary btn-danger" id="btn-confirm-revoke">Confirm Revocation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADJUST LIMIT MODAL ── -->
+<div id="adjust-limit-modal" class="pdf-modal-overlay hidden" role="dialog" aria-modal="true">
+  <div class="pdf-modal-box" style="max-width:440px">
+    <div class="pdf-modal-hdr">
+      <div class="pdf-modal-hdr-left">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span class="pdf-modal-title">Adjust Monthly Budget Limit</span>
+      </div>
+      <button class="pdf-modal-close" id="btn-close-adjust-modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="pdf-modal-body">
+      <p style="font-size:13px;color:var(--t1);margin-bottom:14px" id="adjust-modal-target">Adjust limit for <strong>Video Editing team</strong>:</p>
+      <div class="ff-field">
+        <label class="ff-lbl">New Monthly Budget (₹ INR)</label>
+        <input type="number" class="ff-inp" id="adjust-budget-input" value="150000" step="5000" />
+      </div>
+    </div>
+    <div class="pdf-modal-ftr">
+      <button class="btn btn-secondary" id="btn-cancel-adjust">Cancel</button>
+      <button class="btn btn-primary" id="btn-confirm-adjust">Save New Limit</button>
     </div>
   </div>
 </div>
