@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -216,41 +216,6 @@
 
       <!-- ═══════════════════════════════════════════════════
            PROVIDER LOGO STRIP — appears in Chapter 4
-           Full-width, pinned to bottom of sticky viewport
-           ═══════════════════════════════════════════════════ -->
-      <div class="hero-provider-strip" id="hero-provider-strip">
-        <div class="hero-provider-label">Providers we monitor</div>
-        <div class="provider-marquee">
-          <div class="provider-marquee-track">
-            <!-- Set 1 -->
-            <img class="provider-logo" src="public/providers/chatgpt.jpg"       alt="ChatGPT">
-            <img class="provider-logo" src="public/providers/gemini.jpg"        alt="Gemini">
-            <img class="provider-logo" src="public/providers/claude.jpg"        alt="Claude">
-            <img class="provider-logo" src="public/providers/perplexity.jpg"    alt="Perplexity">
-            <img class="provider-logo" src="public/providers/githubcopilot.jpg" alt="GitHub Copilot">
-            <img class="provider-logo" src="public/providers/elevenlabs.jpg"    alt="ElevenLabs">
-            <img class="provider-logo" src="public/providers/runway.jpg"        alt="Runway">
-            <img class="provider-logo" src="public/providers/midjourney.jpg"    alt="Midjourney">
-            <img class="provider-logo" src="public/providers/adobefirefly.jpg"  alt="Adobe Firefly">
-            <img class="provider-logo" src="public/providers/higgsfield.jpg"    alt="Higgsfield">
-            <img class="provider-logo" src="public/providers/pika.jpg"          alt="Pika">
-            <img class="provider-logo" src="public/providers/klingai.jpg"       alt="KlingAI">
-            <!-- Set 2 (duplicate for seamless loop) -->
-            <img class="provider-logo" src="public/providers/chatgpt.jpg"       alt="ChatGPT">
-            <img class="provider-logo" src="public/providers/gemini.jpg"        alt="Gemini">
-            <img class="provider-logo" src="public/providers/claude.jpg"        alt="Claude">
-            <img class="provider-logo" src="public/providers/perplexity.jpg"    alt="Perplexity">
-            <img class="provider-logo" src="public/providers/githubcopilot.jpg" alt="GitHub Copilot">
-            <img class="provider-logo" src="public/providers/elevenlabs.jpg"    alt="ElevenLabs">
-            <img class="provider-logo" src="public/providers/runway.jpg"        alt="Runway">
-            <img class="provider-logo" src="public/providers/midjourney.jpg"    alt="Midjourney">
-            <img class="provider-logo" src="public/providers/adobefirefly.jpg"  alt="Adobe Firefly">
-            <img class="provider-logo" src="public/providers/higgsfield.jpg"    alt="Higgsfield">
-            <img class="provider-logo" src="public/providers/pika.jpg"          alt="Pika">
-            <img class="provider-logo" src="public/providers/klingai.jpg"       alt="KlingAI">
-          </div>
-        </div>
-      </div>
 
       <!-- Bouncing scroll cue (fades on first scroll) -->
       <div class="hero-scroll-cue" id="hero-scroll-cue">
@@ -260,128 +225,70 @@
         Scroll
       </div>
 
+
     </div><!-- /hero-sticky-viewport -->
   </section>
 
   <!-- ══════════════════════════════════════════════════════════
        PROVIDER LOGO MARQUEE — Always visible, below hero
        Dual rows: top slides RTL, bottom slides LTR
-       ══════════════════════════════════════════════════════════ -->
+  <!-- PROVIDER LOGO MARQUEE — Always visible, dual rows, infinite -->
   <section class="providers-section">
     <p class="providers-heading">AI providers we monitor &amp; control</p>
 
-    <!-- Row 1 — right to left -->
+    <!-- Row 1 — right to left (RTL): ChatGPT, Gemini, Claude, Perplexity, Copilot, ElevenLabs -->
     <div class="providers-row-wrap">
       <div class="providers-track rtl">
-        <!-- Set A -->
-        <div class="provider-card">
-          <img src="public/providers/chatgpt.jpg" alt="ChatGPT" class="pcard-img">
-          <span class="pcard-name">ChatGPT</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/gemini.jpg" alt="Gemini" class="pcard-img">
-          <span class="pcard-name">Gemini</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/claude.jpg" alt="Claude" class="pcard-img">
-          <span class="pcard-name">Claude</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/perplexity.jpg" alt="Perplexity" class="pcard-img">
-          <span class="pcard-name">Perplexity</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/githubcopilot.jpg" alt="GitHub Copilot" class="pcard-img">
-          <span class="pcard-name">Copilot</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/elevenlabs.jpg" alt="ElevenLabs" class="pcard-img">
-          <span class="pcard-name">ElevenLabs</span>
-        </div>
-        <!-- Set B (duplicate for seamless loop) -->
-        <div class="provider-card">
-          <img src="public/providers/chatgpt.jpg" alt="ChatGPT" class="pcard-img">
-          <span class="pcard-name">ChatGPT</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/gemini.jpg" alt="Gemini" class="pcard-img">
-          <span class="pcard-name">Gemini</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/claude.jpg" alt="Claude" class="pcard-img">
-          <span class="pcard-name">Claude</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/perplexity.jpg" alt="Perplexity" class="pcard-img">
-          <span class="pcard-name">Perplexity</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/githubcopilot.jpg" alt="GitHub Copilot" class="pcard-img">
-          <span class="pcard-name">Copilot</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/elevenlabs.jpg" alt="ElevenLabs" class="pcard-img">
-          <span class="pcard-name">ElevenLabs</span>
-        </div>
+        <div class="provider-card"><img src="public/providers/chatgpt.jpg" alt="ChatGPT" class="pcard-img"><span class="pcard-name">ChatGPT</span></div>
+        <div class="provider-card"><img src="public/providers/gemini.jpg" alt="Gemini" class="pcard-img"><span class="pcard-name">Gemini</span></div>
+        <div class="provider-card"><img src="public/providers/claude.jpg" alt="Claude" class="pcard-img"><span class="pcard-name">Claude</span></div>
+        <div class="provider-card"><img src="public/providers/perplexity.jpg" alt="Perplexity" class="pcard-img"><span class="pcard-name">Perplexity</span></div>
+        <div class="provider-card"><img src="public/providers/githubcopilot.jpg" alt="GitHub Copilot" class="pcard-img"><span class="pcard-name">Copilot</span></div>
+        <div class="provider-card"><img src="public/providers/elevenlabs.jpg" alt="ElevenLabs" class="pcard-img"><span class="pcard-name">ElevenLabs</span></div>
+        <!-- Duplicate set 2 -->
+        <div class="provider-card"><img src="public/providers/chatgpt.jpg" alt="ChatGPT" class="pcard-img"><span class="pcard-name">ChatGPT</span></div>
+        <div class="provider-card"><img src="public/providers/gemini.jpg" alt="Gemini" class="pcard-img"><span class="pcard-name">Gemini</span></div>
+        <div class="provider-card"><img src="public/providers/claude.jpg" alt="Claude" class="pcard-img"><span class="pcard-name">Claude</span></div>
+        <div class="provider-card"><img src="public/providers/perplexity.jpg" alt="Perplexity" class="pcard-img"><span class="pcard-name">Perplexity</span></div>
+        <div class="provider-card"><img src="public/providers/githubcopilot.jpg" alt="GitHub Copilot" class="pcard-img"><span class="pcard-name">Copilot</span></div>
+        <div class="provider-card"><img src="public/providers/elevenlabs.jpg" alt="ElevenLabs" class="pcard-img"><span class="pcard-name">ElevenLabs</span></div>
+        <!-- Duplicate set 3 -->
+        <div class="provider-card"><img src="public/providers/chatgpt.jpg" alt="ChatGPT" class="pcard-img"><span class="pcard-name">ChatGPT</span></div>
+        <div class="provider-card"><img src="public/providers/gemini.jpg" alt="Gemini" class="pcard-img"><span class="pcard-name">Gemini</span></div>
+        <div class="provider-card"><img src="public/providers/claude.jpg" alt="Claude" class="pcard-img"><span class="pcard-name">Claude</span></div>
+        <div class="provider-card"><img src="public/providers/perplexity.jpg" alt="Perplexity" class="pcard-img"><span class="pcard-name">Perplexity</span></div>
+        <div class="provider-card"><img src="public/providers/githubcopilot.jpg" alt="GitHub Copilot" class="pcard-img"><span class="pcard-name">Copilot</span></div>
+        <div class="provider-card"><img src="public/providers/elevenlabs.jpg" alt="ElevenLabs" class="pcard-img"><span class="pcard-name">ElevenLabs</span></div>
       </div>
     </div>
 
-    <!-- Row 2 — left to right (opposite direction) -->
-    <div class="providers-row-wrap" style="margin-top: 16px;">
+    <!-- Row 2 — left to right (LTR): Runway, Midjourney, Firefly, Higgsfield, Pika, KlingAI -->
+    <div class="providers-row-wrap" style="margin-top: 20px;">
       <div class="providers-track ltr">
-        <!-- Set A -->
-        <div class="provider-card">
-          <img src="public/providers/runway.jpg" alt="Runway" class="pcard-img">
-          <span class="pcard-name">Runway</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/midjourney.jpg" alt="Midjourney" class="pcard-img">
-          <span class="pcard-name">Midjourney</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/adobefirefly.jpg" alt="Adobe Firefly" class="pcard-img">
-          <span class="pcard-name">Adobe Firefly</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/higgsfield.jpg" alt="Higgsfield" class="pcard-img">
-          <span class="pcard-name">Higgsfield</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/pika.jpg" alt="Pika" class="pcard-img">
-          <span class="pcard-name">Pika</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/klingai.jpg" alt="KlingAI" class="pcard-img">
-          <span class="pcard-name">KlingAI</span>
-        </div>
-        <!-- Set B (duplicate) -->
-        <div class="provider-card">
-          <img src="public/providers/runway.jpg" alt="Runway" class="pcard-img">
-          <span class="pcard-name">Runway</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/midjourney.jpg" alt="Midjourney" class="pcard-img">
-          <span class="pcard-name">Midjourney</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/adobefirefly.jpg" alt="Adobe Firefly" class="pcard-img">
-          <span class="pcard-name">Adobe Firefly</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/higgsfield.jpg" alt="Higgsfield" class="pcard-img">
-          <span class="pcard-name">Higgsfield</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/pika.jpg" alt="Pika" class="pcard-img">
-          <span class="pcard-name">Pika</span>
-        </div>
-        <div class="provider-card">
-          <img src="public/providers/klingai.jpg" alt="KlingAI" class="pcard-img">
-          <span class="pcard-name">KlingAI</span>
-        </div>
+        <div class="provider-card"><img src="public/providers/runway.jpg" alt="Runway" class="pcard-img"><span class="pcard-name">Runway</span></div>
+        <div class="provider-card"><img src="public/providers/midjourney.jpg" alt="Midjourney" class="pcard-img"><span class="pcard-name">Midjourney</span></div>
+        <div class="provider-card"><img src="public/providers/adobefirefly.jpg" alt="Adobe Firefly" class="pcard-img"><span class="pcard-name">Adobe Firefly</span></div>
+        <div class="provider-card"><img src="public/providers/higgsfield.jpg" alt="Higgsfield" class="pcard-img"><span class="pcard-name">Higgsfield</span></div>
+        <div class="provider-card"><img src="public/providers/pika.jpg" alt="Pika" class="pcard-img"><span class="pcard-name">Pika</span></div>
+        <div class="provider-card"><img src="public/providers/klingai.jpg" alt="KlingAI" class="pcard-img"><span class="pcard-name">KlingAI</span></div>
+        <!-- Duplicate set 2 -->
+        <div class="provider-card"><img src="public/providers/runway.jpg" alt="Runway" class="pcard-img"><span class="pcard-name">Runway</span></div>
+        <div class="provider-card"><img src="public/providers/midjourney.jpg" alt="Midjourney" class="pcard-img"><span class="pcard-name">Midjourney</span></div>
+        <div class="provider-card"><img src="public/providers/adobefirefly.jpg" alt="Adobe Firefly" class="pcard-img"><span class="pcard-name">Adobe Firefly</span></div>
+        <div class="provider-card"><img src="public/providers/higgsfield.jpg" alt="Higgsfield" class="pcard-img"><span class="pcard-name">Higgsfield</span></div>
+        <div class="provider-card"><img src="public/providers/pika.jpg" alt="Pika" class="pcard-img"><span class="pcard-name">Pika</span></div>
+        <div class="provider-card"><img src="public/providers/klingai.jpg" alt="KlingAI" class="pcard-img"><span class="pcard-name">KlingAI</span></div>
+        <!-- Duplicate set 3 -->
+        <div class="provider-card"><img src="public/providers/runway.jpg" alt="Runway" class="pcard-img"><span class="pcard-name">Runway</span></div>
+        <div class="provider-card"><img src="public/providers/midjourney.jpg" alt="Midjourney" class="pcard-img"><span class="pcard-name">Midjourney</span></div>
+        <div class="provider-card"><img src="public/providers/adobefirefly.jpg" alt="Adobe Firefly" class="pcard-img"><span class="pcard-name">Adobe Firefly</span></div>
+        <div class="provider-card"><img src="public/providers/higgsfield.jpg" alt="Higgsfield" class="pcard-img"><span class="pcard-name">Higgsfield</span></div>
+        <div class="provider-card"><img src="public/providers/pika.jpg" alt="Pika" class="pcard-img"><span class="pcard-name">Pika</span></div>
+        <div class="provider-card"><img src="public/providers/klingai.jpg" alt="KlingAI" class="pcard-img"><span class="pcard-name">KlingAI</span></div>
       </div>
     </div>
   </section>
+
 
   <!-- Bento Grid Section -->
   <section id="bento" class="bento-sec">

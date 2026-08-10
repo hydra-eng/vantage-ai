@@ -949,12 +949,12 @@ select.ff-in option{background:var(--surface)}
 .providers-heading {
   text-align: center;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #3f3f46;
-  margin-bottom: 40px;
+  color: #52525b;
+  margin-bottom: 48px;
 }
 
 /* Each row is a masked overflow container */
@@ -982,9 +982,10 @@ select.ff-in option{background:var(--surface)}
 /* The scrolling track — width max-content fits all cards */
 .providers-track {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   width: max-content;
   align-items: center;
+  will-change: transform;
 }
 .providers-track.rtl {
   animation: track-rtl 36s linear infinite;
@@ -992,58 +993,55 @@ select.ff-in option{background:var(--surface)}
 .providers-track.ltr {
   animation: track-ltr 42s linear infinite;
 }
-/* Pause both rows on hover for premium feel */
-.providers-row-wrap:hover .providers-track {
-  animation-play-state: paused;
-}
+/* Animation NEVER pauses — infinite always-running loop */
 
-/* Individual provider card */
+/* Individual provider card — larger, more premium */
 .provider-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px;
-  padding: 20px 28px;
+  gap: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 20px;
+  padding: 24px 32px;
   flex-shrink: 0;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
   cursor: default;
 }
 .provider-card:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-3px);
 }
 
-/* The logo image inside each card */
+/* Logo image — larger and crisper */
 .pcard-img {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
-  border-radius: 12px;
-  /* Slight saturation and brightness boost — raw logos look better than inverted here */
-  filter: saturate(0.9) brightness(1.0);
+  border-radius: 14px;
+  filter: saturate(1.0) brightness(1.05);
   display: block;
 }
 
 /* Provider name label */
 .pcard-name {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  color: #52525b;
-  letter-spacing: 0.08em;
+  color: #71717a;
+  letter-spacing: 0.06em;
   white-space: nowrap;
 }
 
 /* Keyframes */
 @keyframes track-rtl {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-33.333%); }
 }
 @keyframes track-ltr {
-  0%   { transform: translateX(-50%); }
+  0%   { transform: translateX(-33.333%); }
   100% { transform: translateX(0); }
 }
 
