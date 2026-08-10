@@ -729,13 +729,16 @@ function renderBudgets(){
   }).join('');
 }
 
-function renderAlerts(){
+let activeAlertFilter = 'all';
+function renderAlerts(filter = activeAlertFilter){
+  activeAlertFilter = filter;
   const el=document.getElementById('ba-alerts');if(!el)return;
-  el.innerHTML=alerts.map(a=>{
+  const list = alerts.filter(a => filter === 'all' || a.sev === filter);
+  el.innerHTML=list.map(a=>{
     const cls=a.sev==='critical'?'ai-icon-err':'ai-icon-warn';
     const tcls=a.sev==='critical'?'ai-title-err':'ai-title-warn';
     const icon=a.sev==='critical'?'◬':'⚠';
-    return `<div class="alert-item">
+    return `<div class="alert-item" data-sev="${a.sev}">
       <div class="ai-icon ${cls}">${icon}</div>
       <div class="ai-bd">
         <div class="ai-title ${tcls}">${a.title}</div>
@@ -751,6 +754,69 @@ function renderAlerts(){
     </div>`;
   }).join('');
 }
+
+// Wire alert chip filters
+document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('on'));
+    chip.classList.add('on');
+    renderAlerts(chip.dataset.filter);
+  });
+});
+
+// ============================================================
+// PDF EXPORT CONTROLLER & MODAL BINDINGS
+// ============================================================
+function openPDFModal() {
+  const modal = document.getElementById('pdf-options-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closePDFModal() {
+  const modal = document.getElementById('pdf-options-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// Bind PDF Triggers & Modal Buttons
+document.addEventListener('click', (e) => {
+  const target = e.target;
+
+  // Open PDF Options Modal when any [data-pdf-trigger] or "Generate Report" is clicked
+  if (target.dataset.pdfTrigger !== undefined || target.closest('[data-pdf-trigger]')) {
+    e.preventDefault();
+    openPDFModal();
+  }
+
+  // Close PDF Modal
+  if (target.id === 'btn-pdf-modal-close' || target.closest('#btn-pdf-modal-close') || target.id === 'btn-pdf-cancel') {
+    e.preventDefault();
+    closePDFModal();
+  }
+
+  // Confirm & Execute Download PDF inside Modal
+  if (target.id === 'btn-pdf-confirm' || target.closest('#btn-pdf-confirm')) {
+    e.preventDefault();
+    const period = document.getElementById('pdf-period')?.value || 'July 2026';
+    const workspace = document.getElementById('pdf-workspace')?.value || 'TechCorp India Pvt. Ltd.';
+    const sigName = document.getElementById('pdf-sig-name')?.value || 'Aditya Sharma';
+    const includeAppendix = document.getElementById('pdf-include-appendix')?.checked !== false;
+
+    if (typeof window.generateVantagePDF === 'function') {
+      window.generateVantagePDF({ period, workspace, sigName, includeAppendix });
+    } else {
+      showToast('PDF Export engine initializing... try again', 'warning');
+    }
+    closePDFModal();
+  }
+});
+
+// Keyboard Shortcut Ctrl+Shift+P for PDF Modal
+window.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
+    e.preventDefault();
+    openPDFModal();
+  }
+});
 
 // ============================================================
 // EXPORT CSV REPORT
