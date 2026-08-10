@@ -528,10 +528,10 @@ select.ff-in option{background:var(--surface)}
    CANVAS SCROLL HERO — 4-CHAPTER APPLE-STYLE PARALLAX
    ════════════════════════════════════════════════════════════ */
 
-/* 600vh gives each of the 4 chapters ~150vh of scroll room */
+/* 750vh gives each of the 5 chapters ~150vh of scroll room */
 .hero-scroll-container {
   position: relative;
-  height: 600vh;
+  height: 750vh;
   background: #0a0a0c;
 }
 
@@ -887,7 +887,77 @@ select.ff-in option{background:var(--surface)}
   border-radius: 20px;
 }
 
+/* ── ANOMALY CARDS (Chapter 5 — Shadow AI Detection) ── */
+.hero-anomaly-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  max-width: 540px;
+}
+.hero-anomaly-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.hero-anomaly-card:hover {
+  background: rgba(255,255,255,0.055);
+  border-color: rgba(255,255,255,0.14);
+}
+.hac-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 6px;
+}
+.hac-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+.hac-red   { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+.hac-amber { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+.hac-blue  { background: #38bdf8; box-shadow: 0 0 8px rgba(56,189,248,0.5); }
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+.hac-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #52525b;
+  text-transform: uppercase;
+}
+.hac-time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #3f3f46;
+  margin-left: auto;
+}
+.hac-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin-bottom: 3px;
+}
+.hac-desc {
+  font-size: 13px;
+  color: #71717a;
+  line-height: 1.55;
+}
+.hac-desc strong {
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
 /* ── PROVIDER STRIP — full-width, pinned to bottom of sticky viewport ── */
+
 .hero-provider-strip {
   position: absolute;
   bottom: 0;
