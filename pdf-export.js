@@ -2,14 +2,14 @@
  * Vantage AI — 3-Sheet Corporate Billing Packet
  * All pages: Portrait A4 (210 × 297 mm) — print-ready
  *
- * Color palette: Clean corporate white with deep-slate headers.
- * Modelled on TCS / Infosys / Deloitte / SAP billing documents.
+ * Color palette: Classic Corporate Black, White & Warm Vintage Espresso/Brown.
+ * Designed for real-life corporate billing, tax compliance & C-suite submission.
  *
- * Requires jsPDF 2.5 + jspdf-autotable 3.8 (CDN-loaded before this module).
+ * Requires jsPDF 2.5 + jspdf-autotable 3.8 (loaded in <head> before this file).
  */
 
 /* ═══════════════════════════════════════════════════════════
-   CORPORATE IDENTITY
+   CORPORATE IDENTITY & TAX CONSTANTS
 ═══════════════════════════════════════════════════════════ */
 const CO = {
   name:   'TechCorp India Private Limited',
@@ -25,47 +25,44 @@ const CO = {
 const INV   = 'VTG-2026-07-INV-0041';
 const IDATE = '31 July 2026';
 const DDATE = '15 August 2026';
+const GST   = 0.18;
 
 /* ═══════════════════════════════════════════════════════════
-   PROFESSIONAL COLOR TOKENS
-   Palette: Corporate slate-blue headers, clean white pages,
-   hairline #E5E7EB borders — prints well on laser/inkjet.
+   CLASSIC BLACK, WHITE & VINTAGE CORPORATE BROWN PALETTE
 ═══════════════════════════════════════════════════════════ */
 const P = {
-  /* Page structure — Executive Onyx Charcoal & Forest Emerald (Non-Blue) */
-  headerBg:  [24,  28,  36],   // Deep Obsidian Charcoal (#181C24)
-  headerSub: [48,  56,  68],   // Slate Charcoal
-  accent:    [16,  98,  67],   // Deep Forest Emerald Green (#106243)
-  accentGold:[180, 130, 20],   // Warm Executive Gold (#B48214)
-  white:     [255, 255, 255],
-  black:     [10,  12,  18],
+  /* Page structure — Classic Black, White & Vintage Warm Brown */
+  headerBg:   [28,  24,  22],   // Deep Espresso Black (#1C1816)
+  headerSub:  [56,  48,  44],   // Warm Charcoal Brown
+  accent:     [107, 76,  59],   // Classic Warm Corporate Brown (#6B4C3B)
+  accentWarm: [140, 100, 75],   // Warm Sepia Saddle Brown
+  white:      [255, 255, 255],
+  black:      [17,  17,  17],
 
   /* Typography */
-  ink:       [17,  24,  39],   // Deep Ink (#111827)
-  subtext:   [75,  85,  99],   // Neutral Muted (#4B5563)
-  caption:   [107, 114, 128],  // Fine print (#6B7280)
+  ink:        [20,  20,  20],   // Deep Crisp Charcoal
+  subtext:    [85,  75,  70],   // Warm Neutral Subtext
+  caption:    [120, 110, 105],  // Fine print
 
   /* Table */
-  thBg:      [34,  40,  50],   // Dark Onyx Charcoal table header
-  thText:    [255, 255, 255],
-  rowAlt:    [247, 249, 248],  // Light Slate Tint
-  rowHover:  [240, 245, 242],
-  border:    [215, 222, 226],  // Hairline neutral border
-  sectionBg: [235, 242, 238],  // Soft Mint Slate section header
+  thBg:       [43,  35,  29],   // Dark Espresso Table Header
+  thText:     [255, 255, 255],
+  rowAlt:     [250, 248, 245],  // Soft Warm Cream Tint
+  rowHover:   [244, 240, 235],
+  border:     [213, 206, 199],  // Hairline Warm Sepia Border
+  sectionBg:  [245, 242, 237],  // Soft Linen Parchment Section Header
 
   /* Status badges */
-  green:     [16,  98,  67],
-  greenBg:   [222, 247, 236],
-  amber:     [180, 100, 10],
-  amberBg:   [254, 243, 199],
-  red:       [185, 28,  28],
-  redBg:     [254, 226, 226],
+  green:      [45,  100, 50],
+  greenBg:    [235, 246, 236],
+  amber:      [160, 90,  15],
+  amberBg:    [254, 243, 225],
+  red:        [175, 30,  30],
+  redBg:      [254, 230, 230],
 
   /* Footer */
-  footerBg:  [24,  28,  36],
+  footerBg:   [28,  24,  22],
 };
-
-const GST = 0.18;
 
 /* ═══════════════════════════════════════════════════════════
    DATA SETS
@@ -142,11 +139,11 @@ function pColor(p) { return p >= 100 ? P.red : p >= 80 ? P.amber : P.green; }
 
 /** Draw the standard page header band. Returns y after header. */
 function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
-  // Main navy band
+  // Main Espresso Black header band
   doc.setFillColor(...P.headerBg);
   doc.rect(0, 0, W, 26, 'F');
 
-  // Left accent stripe — brand blue
+  // Left accent stripe — Classic Warm Brown
   doc.setFillColor(...P.accent);
   doc.rect(0, 0, 3.5, 26, 'F');
 
@@ -159,17 +156,17 @@ function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
   // Subtitle
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  doc.setTextColor(200, 210, 225);
+  doc.setTextColor(215, 205, 195);
   doc.text(subtitle, ML + 4, 18.5);
 
   // Right meta
   doc.setFontSize(6.5);
-  doc.setTextColor(200, 210, 225);
+  doc.setTextColor(215, 205, 195);
   doc.text(`Invoice: ${INV}`, W - MR, 9, { align: 'right' });
   doc.text(`Period: ${opts.period}   |   Entity: ${opts.workspace}`, W - MR, 14.5, { align: 'right' });
   doc.text(pgLabel, W - MR, 20, { align: 'right' });
 
-  // Thin accent rule under header
+  // Thin Warm Brown accent rule under header
   doc.setFillColor(...P.accent);
   doc.rect(0, 26, W, 1.2, 'F');
 
@@ -183,13 +180,13 @@ function sLabel(doc, ML, BW, y, text) {
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.2);
   doc.rect(ML, y, BW, 5.5);
-  // Left accent mark
+  // Left accent mark — Warm Brown
   doc.setFillColor(...P.accent);
-  doc.rect(ML, y, 2, 5.5, 'F');
+  doc.rect(ML, y, 2.5, 5.5, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(...P.headerBg);
-  doc.text(text, ML + 5, y + 3.9);
+  doc.text(text, ML + 5.5, y + 3.9);
   return y + 7.5;
 }
 
@@ -226,14 +223,14 @@ function tStyles() {
       textColor: P.thText,
       fontStyle: 'bold',
       fontSize: 6.8,
-      cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+      cellPadding: { top: 2.8, bottom: 2.8, left: 2.5, right: 2.5 },
       lineColor: P.thBg,
       lineWidth: 0,
     },
     bodyStyles: {
-      fontSize: 7,
+      fontSize: 6.8,
       textColor: P.ink,
-      cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+      cellPadding: { top: 2.2, bottom: 2.2, left: 2.5, right: 2.5 },
       lineColor: P.border,
       lineWidth: 0.2,
     },
@@ -242,8 +239,8 @@ function tStyles() {
       fillColor: P.headerBg,
       textColor: P.white,
       fontStyle: 'bold',
-      fontSize: 7,
-      cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+      fontSize: 6.8,
+      cellPadding: { top: 2.8, bottom: 2.8, left: 2.5, right: 2.5 },
       lineWidth: 0,
     },
   };
@@ -263,13 +260,14 @@ function buildSheet1(doc, opts) {
 
   /* ── BILLED TO / TAX CLASSIFICATION split ─── */
   const hBW = (BW - 4) / 2;
+  const boxH1 = 28;
 
   // Box 1: Billed To
-  doc.setFillColor(252, 253, 255);
-  doc.rect(ML, y, hBW, 26, 'F');
+  doc.setFillColor(253, 252, 250);
+  doc.rect(ML, y, hBW, boxH1, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
-  doc.rect(ML, y, hBW, 26);
+  doc.rect(ML, y, hBW, boxH1);
   doc.setFillColor(...P.thBg);
   doc.rect(ML, y, hBW, 4.5, 'F');
   doc.setFont('helvetica', 'bold');
@@ -286,18 +284,18 @@ function buildSheet1(doc, opts) {
   ];
   billedLines.forEach(([txt, bold], i) => {
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.setFontSize(bold ? 7.5 : 6.8);
+    doc.setFontSize(bold ? 7.5 : 6.5);
     const tc1 = bold ? P.ink : P.subtext;
     doc.setTextColor(...tc1);
-    doc.text(txt, ML + 3, y + 8 + i * 3.8);
+    doc.text(txt, ML + 3, y + 8.5 + i * 3.8);
   });
 
   // Box 2: Invoice & Tax Reference
   const rx = ML + hBW + 4;
-  doc.setFillColor(252, 253, 255);
-  doc.rect(rx, y, hBW, 26, 'F');
+  doc.setFillColor(253, 252, 250);
+  doc.rect(rx, y, hBW, boxH1, 'F');
   doc.setDrawColor(...P.border);
-  doc.rect(rx, y, hBW, 26);
+  doc.rect(rx, y, hBW, boxH1);
   doc.setFillColor(...P.thBg);
   doc.rect(rx, y, hBW, 4.5, 'F');
   doc.setFont('helvetica', 'bold');
@@ -314,18 +312,18 @@ function buildSheet1(doc, opts) {
     ['Reverse Charge',     'Not Applicable'],
   ];
   refLines.forEach(([k, v], i) => {
-    const ly = y + 8 + i * 3.1;
+    const ly = y + 8.2 + i * 3.2;
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
+    doc.setFontSize(6.3);
     doc.setTextColor(...P.subtext);
     doc.text(k + ':', rx + 3, ly);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
+    doc.setFontSize(6.3);
     doc.setTextColor(...P.ink);
     doc.text(v, rx + hBW - 3, ly, { align: 'right' });
   });
 
-  y += 30;
+  y += boxH1 + 4;
 
   /* ── 5 KPI TILES ─────────────────────────────── */
   const totalNet   = PROVIDERS.reduce((s, p) => s + p.net, 0);
@@ -349,31 +347,31 @@ function buildSheet1(doc, opts) {
   kpis.forEach((k, i) => {
     const cx = ML + i * (kW + 2);
     doc.setFillColor(...P.white);
-    doc.rect(cx, y, kW, 17, 'F');
+    doc.rect(cx, y, kW, 16.5, 'F');
     doc.setDrawColor(...P.border);
     doc.setLineWidth(0.25);
-    doc.rect(cx, y, kW, 17);
+    doc.rect(cx, y, kW, 16.5);
     // Bottom accent bar
     doc.setFillColor(...k.clr);
-    doc.rect(cx, y + 15, kW, 2, 'F');
+    doc.rect(cx, y + 14.5, kW, 2, 'F');
     // Label
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(5.8);
     doc.setTextColor(...P.caption);
-    doc.text(k.lbl, cx + kW / 2, y + 5.5, { align: 'center' });
+    doc.text(k.lbl, cx + kW / 2, y + 5, { align: 'center' });
     // Value
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...k.clr);
-    doc.text(k.val, cx + kW / 2, y + 11, { align: 'center' });
+    doc.text(k.val, cx + kW / 2, y + 10.2, { align: 'center' });
     // Note
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(5.5);
     doc.setTextColor(...k.clr);
-    doc.text(k.note, cx + kW / 2, y + 14.5, { align: 'center' });
+    doc.text(k.note, cx + kW / 2, y + 13.5, { align: 'center' });
   });
 
-  y += 21;
+  y += 20.5;
 
   /* ── PROVIDER COST TABLE ──────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 1  —  AI PROVIDER COST & TAX BREAKDOWN');
@@ -437,18 +435,18 @@ function buildSheet1(doc, opts) {
     footStyles, showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 5;
+  y = doc.lastAutoTable.finalY + 4.5;
 
   /* ── TAX SUMMARY + BANK DETAILS ─────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 2  —  TAX AMOUNT SUMMARY & PAYMENT DETAILS');
-  const boxH = 30, halfW = (BW - 4) / 2;
+  const boxH2 = 31, halfW = (BW - 4) / 2;
 
   // Left: Tax breakdown
-  doc.setFillColor(252, 253, 255);
-  doc.rect(ML, y, halfW, boxH, 'F');
+  doc.setFillColor(253, 252, 250);
+  doc.rect(ML, y, halfW, boxH2, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
-  doc.rect(ML, y, halfW, boxH);
+  doc.rect(ML, y, halfW, boxH2);
   doc.setFillColor(...P.thBg);
   doc.rect(ML, y, halfW, 4, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.white);
@@ -463,13 +461,13 @@ function buildSheet1(doc, opts) {
     ['TOTAL AMOUNT PAYABLE',      inr(totalGross), true],
   ];
   taxRows.forEach(([k, v, bold], i) => {
-    const ly = y + 7 + i * 3.9;
+    const ly = y + 6.8 + i * 3.9;
     if (bold) {
       doc.setFillColor(...P.sectionBg);
       doc.rect(ML, ly - 2.5, halfW, 5, 'F');
     }
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.setFontSize(7);
+    doc.setFontSize(6.8);
     const tc2 = bold ? P.headerBg : P.subtext;
     doc.setTextColor(...tc2);
     doc.text(k, ML + 3, ly);
@@ -478,10 +476,10 @@ function buildSheet1(doc, opts) {
 
   // Right: Bank details
   const rxBank = ML + halfW + 4;
-  doc.setFillColor(252, 253, 255);
-  doc.rect(rxBank, y, halfW, boxH, 'F');
+  doc.setFillColor(253, 252, 250);
+  doc.rect(rxBank, y, halfW, boxH2, 'F');
   doc.setDrawColor(...P.border);
-  doc.rect(rxBank, y, halfW, boxH);
+  doc.rect(rxBank, y, halfW, boxH2);
   doc.setFillColor(...P.thBg);
   doc.rect(rxBank, y, halfW, 4, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.white);
@@ -496,18 +494,19 @@ function buildSheet1(doc, opts) {
     ['Due By',        DDATE],
   ];
   bankRows.forEach(([k, v], i) => {
-    const ly = y + 7 + i * 3.9;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(...P.subtext);
+    const ly = y + 6.8 + i * 3.9;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...P.subtext);
     doc.text(k + ':', rxBank + 3, ly);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.ink);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.ink);
     doc.text(v, rxBank + halfW - 3, ly, { align: 'right' });
   });
 
-  y += boxH + 5;
+  y += boxH2 + 4.5;
 
   /* ── EXECUTIVE SIGN-OFF ─────────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 3  —  EXECUTIVE AUTHORIZATION & COMPLIANCE SIGN-OFF');
   const sigW = (BW - 2 * 4) / 3;
+  const sigH = 21;
   const sigs = [
     { role: 'FINANCE DIRECTOR / CFO',      name: opts.sigName || 'Authorised Signatory' },
     { role: 'CISO / COMPLIANCE LEAD',       name: 'Security & Risk Officer' },
@@ -515,25 +514,25 @@ function buildSheet1(doc, opts) {
   ];
   sigs.forEach((s, i) => {
     const sx = ML + i * (sigW + 4);
-    doc.setFillColor(252, 253, 255);
-    doc.rect(sx, y, sigW, 20, 'F');
+    doc.setFillColor(253, 252, 250);
+    doc.rect(sx, y, sigW, sigH, 'F');
     doc.setDrawColor(...P.border);
     doc.setLineWidth(0.3);
-    doc.rect(sx, y, sigW, 20);
+    doc.rect(sx, y, sigW, sigH);
     doc.setFillColor(...P.thBg);
     doc.rect(sx, y, sigW, 4, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(...P.white);
     doc.text(s.role, sx + sigW / 2, y + 2.8, { align: 'center' });
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...P.subtext);
-    doc.text(s.name, sx + 3, y + 9.5);
+    doc.text(s.name, sx + 3, y + 9);
 
     doc.setDrawColor(...P.subtext);
     doc.setLineWidth(0.3);
-    doc.line(sx + 3, y + 14.5, sx + sigW - 3, y + 14.5);
+    doc.line(sx + 3, y + 14, sx + sigW - 3, y + 14);
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(...P.caption);
-    doc.text('Signature & Official Seal         Date: _____ / _____ / _______', sx + 3, y + 18.5);
+    doc.text('Signature & Seal       Date: ___/___/______', sx + 3, y + 18);
   });
 
   drawFooter(doc, W, ML, MR, 'Sheet 1 of 3');
@@ -624,7 +623,7 @@ function buildSheet2(doc, opts) {
     footStyles, showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 6;
+  y = doc.lastAutoTable.finalY + 5;
 
   /* ── MODEL RATE CARD ──────────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 2  —  AI MODEL TIER UNIT ECONOMICS (₹ PER 1K TOKENS, EXCL. GST)');
@@ -648,7 +647,7 @@ function buildSheet2(doc, opts) {
       const avg   = ((inp + out) / 2);
       const gross = avg * 1.18;
       return [
-        { content: key,              styles: { font: 'courier', fontSize: 6.5 } },
+        { content: key,              styles: { font: 'courier', fontSize: 6.2 } },
         { content: '₹'+inp.toFixed(4),  styles: { font: 'courier', halign: 'right' } },
         { content: '₹'+out.toFixed(4),  styles: { font: 'courier', halign: 'right' } },
         { content: '₹'+avg.toFixed(4),  styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
@@ -667,16 +666,17 @@ function buildSheet2(doc, opts) {
     showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 6;
+  y = doc.lastAutoTable.finalY + 5;
 
   /* ── GOVERNANCE RULES BOX ────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 3  —  AUTOMATED AI GOVERNANCE & ENFORCEMENT POLICY');
+  const boxH3 = 27;
 
-  doc.setFillColor(252, 253, 255);
-  doc.rect(ML, y, BW, 26, 'F');
+  doc.setFillColor(253, 252, 250);
+  doc.rect(ML, y, BW, boxH3, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
-  doc.rect(ML, y, BW, 26);
+  doc.rect(ML, y, BW, boxH3);
 
   const halfBW = (BW - 5) / 2;
   const rules = [
@@ -717,7 +717,7 @@ function buildSheet2(doc, opts) {
 
 /* ═══════════════════════════════════════════════════════════
    SHEET 3: RAW TELEMETRY APPENDIX — PORTRAIT A4
-   210 × 297 mm (same as sheets 1 & 2)
+   210 × 297 mm (exact 182mm table width, 0% overflow)
 ═══════════════════════════════════════════════════════════ */
 function buildSheet3(doc, opts) {
   const W=210, ML=14, MR=14, BW=W-ML-MR;
@@ -731,7 +731,7 @@ function buildSheet3(doc, opts) {
 
   y = sLabel(doc, ML, BW, y, `SECTION 1  —  ITEMISED API CALL LEDGER (${TELEM.length} TRANSACTIONS, ${opts.period.toUpperCase()})`);
 
-  // Portrait A4 — 12 columns in 182mm usable width
+  // Column width sum = 23 + 17 + 19 + 15 + 22 + 14 + 14 + 14 + 13 + 15 + 11 + 5 = 182mm EXACT!
   doc.autoTable({
     startY: y,
     margin: { left: ML, right: MR },
@@ -753,28 +753,28 @@ function buildSheet3(doc, opts) {
       const gst   = Math.round(r.net * GST);
       const total = r.net + gst;
       return [
-        { content: r.ts,   styles: { font: 'courier', fontSize: 6, textColor: P.subtext } },
-        { content: r.eid,  styles: { font: 'courier', fontSize: 6, textColor: P.accent  } },
-        { content: r.dept, styles: { fontSize: 6.5 } },
-        { content: r.prov, styles: { fontSize: 6.5 } },
-        { content: r.model,styles: { font: 'courier', fontSize: 6 } },
-        { content: r.pt.toLocaleString('en-IN'),  styles: { font: 'courier', halign: 'right', fontSize: 6.5 } },
-        { content: r.ct.toLocaleString('en-IN'),  styles: { font: 'courier', halign: 'right', fontSize: 6.5 } },
-        { content: inr(r.net),   styles: { font: 'courier', halign: 'right', fontSize: 6.5 } },
-        { content: inr(gst),     styles: { font: 'courier', halign: 'right', fontSize: 6.5 } },
-        { content: inr(total),   styles: { font: 'courier', halign: 'right', fontSize: 6.5, fontStyle: 'bold' } },
-        { content: pLabel(r.pct),styles: { halign: 'center', fontSize: 6 } },
-        { content: r.loop ? 'LOOP' : 'OK', styles: { halign: 'center', fontSize: 6 } },
+        { content: r.ts,   styles: { font: 'courier', fontSize: 5.8, textColor: P.subtext } },
+        { content: r.eid,  styles: { font: 'courier', fontSize: 6.0, textColor: P.accent  } },
+        { content: r.dept, styles: { fontSize: 6.2 } },
+        { content: r.prov, styles: { fontSize: 6.2 } },
+        { content: r.model,styles: { font: 'courier', fontSize: 5.8 } },
+        { content: r.pt.toLocaleString('en-IN'),  styles: { font: 'courier', halign: 'right', fontSize: 6.2 } },
+        { content: r.ct.toLocaleString('en-IN'),  styles: { font: 'courier', halign: 'right', fontSize: 6.2 } },
+        { content: inr(r.net),   styles: { font: 'courier', halign: 'right', fontSize: 6.2 } },
+        { content: inr(gst),     styles: { font: 'courier', halign: 'right', fontSize: 6.2 } },
+        { content: inr(total),   styles: { font: 'courier', halign: 'right', fontSize: 6.2, fontStyle: 'bold' } },
+        { content: pLabel(r.pct),styles: { halign: 'center', fontSize: 5.8 } },
+        { content: r.loop ? 'LOOP' : 'OK', styles: { halign: 'center', fontSize: 5.8 } },
       ];
     }),
-    headStyles: { ...headStyles, fontSize: 6.5, cellPadding: { top:2.5, bottom:2.5, left:2.5, right:2.5 } },
-    bodyStyles:  { ...bodyStyles,  fontSize: 6.5, cellPadding: { top:2.2, bottom:2.2, left:2.5, right:2.5 } },
+    headStyles: { ...headStyles, fontSize: 6.3, cellPadding: { top: 2.2, bottom: 2.2, left: 2, right: 2 } },
+    bodyStyles:  { ...bodyStyles,  fontSize: 6.2, cellPadding: { top: 2.0, bottom: 2.0, left: 2, right: 2 } },
     alternateRowStyles,
     columnStyles: {
-      0:{cellWidth:21}, 1:{cellWidth:18}, 2:{cellWidth:17},
-      3:{cellWidth:16}, 4:{cellWidth:26}, 5:{cellWidth:13},
-      6:{cellWidth:15}, 7:{cellWidth:14}, 8:{cellWidth:13},
-      9:{cellWidth:15}, 10:{cellWidth:11},11:{cellWidth:9},
+      0:{cellWidth:23}, 1:{cellWidth:17}, 2:{cellWidth:19},
+      3:{cellWidth:15}, 4:{cellWidth:22}, 5:{cellWidth:14},
+      6:{cellWidth:14}, 7:{cellWidth:14}, 8:{cellWidth:13},
+      9:{cellWidth:15}, 10:{cellWidth:11},11:{cellWidth:5},
     },
     willDrawCell(d) {
       if (d.section !== 'body') return;
@@ -801,7 +801,7 @@ function buildSheet3(doc, opts) {
       { content: inr(Math.round(TELEM.reduce((s,r)=>s+r.net,0)*GST)),    styles: { font:'courier', halign:'right', fontStyle:'bold' } },
       { content: inr(Math.round(TELEM.reduce((s,r)=>s+r.net,0)*1.18)),   styles: { font:'courier', halign:'right', fontStyle:'bold' } },
       { content: '' },
-      { content: `${TELEM.filter(r=>r.loop).length} LOOP(S)`, styles: { halign:'center', fontStyle:'bold', textColor: P.red } },
+      { content: `${TELEM.filter(r=>r.loop).length} LOOP`, styles: { halign:'center', fontStyle:'bold', textColor: P.red } },
     ]],
     footStyles, showFoot: 'lastPage', showHead: 'everyPage',
     rowPageBreak: 'avoid',
@@ -810,34 +810,34 @@ function buildSheet3(doc, opts) {
     },
   });
 
-  y = doc.lastAutoTable.finalY + 5;
+  y = doc.lastAutoTable.finalY + 4.5;
 
   /* ── AUDIT CERTIFICATION BOX ─────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 2  —  TELEMETRY AUDIT CERTIFICATION & COMPLIANCE SIGN-OFF');
 
-  const certH = Math.min(30, 280 - y);
+  const certH = Math.min(27, 280 - y);
   if (certH > 10) {
-    doc.setFillColor(252, 253, 255);
+    doc.setFillColor(253, 252, 250);
     doc.rect(ML, y, BW, certH, 'F');
     doc.setDrawColor(...P.border);
     doc.setLineWidth(0.3);
     doc.rect(ML, y, BW, certH);
 
     const halfCW = (BW - 5) / 2;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...P.headerBg);
-    doc.text('AUDIT CERTIFICATION:', ML + 4, y + 6);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...P.subtext);
-    doc.text('This 3-sheet billing packet is generated by Vantage AI and contains verified', ML + 4, y + 11);
-    doc.text('raw telemetry sourced from live API provider logs. IGST @ 18% is computed', ML + 4, y + 15);
-    doc.text(`under SAC ${CO.sac}. All amounts are in Indian Rupees (INR).`, ML + 4, y + 19);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
+    doc.text('AUDIT CERTIFICATION:', ML + 4, y + 5.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3); doc.setTextColor(...P.subtext);
+    doc.text('This 3-sheet billing packet is generated by Vantage AI and contains verified', ML + 4, y + 10.5);
+    doc.text('raw telemetry sourced from live API provider logs. IGST @ 18% is computed', ML + 4, y + 14.5);
+    doc.text(`under SAC ${CO.sac}. All amounts are in Indian Rupees (INR).`, ML + 4, y + 18.5);
 
     const rx3 = ML + halfCW + 5;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.headerBg);
-    doc.text('INTERNAL CONTROL AUDITOR:', rx3, y + 6);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
+    doc.text('INTERNAL CONTROL AUDITOR:', rx3, y + 5.5);
     doc.setDrawColor(...P.subtext); doc.setLineWidth(0.35);
-    doc.line(rx3, y + 18, rx3 + halfCW - 2, y + 18);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(...P.caption);
-    doc.text('Signature & Official Stamp              Date: _____ / _____ / _______', rx3, y + 22);
+    doc.line(rx3, y + 17, rx3 + halfCW - 2, y + 17);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...P.caption);
+    doc.text('Signature & Official Stamp            Date: ___/___/______', rx3, y + 21);
   }
 }
 
