@@ -10,6 +10,11 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
+<!-- jsPDF — load in head so it's ready before any body script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- PDF export logic — runs synchronously before body module scripts -->
+<script src="./pdf-export.js"></script>
 </head>
 <body>
 
@@ -1361,9 +1366,6 @@
   </div>
 </div>
 
-<!-- PDF Export — dynamically loads jsPDF on demand (no race condition) -->
-<script src="./pdf-export.js" defer></script>
-
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -1716,11 +1718,7 @@ document.getElementById('btn-pdf-confirm')?.addEventListener('click', async () =
   const workspace = document.getElementById('pdf-workspace')?.value || 'TechCorp India Pvt. Ltd.';
   const sigName   = document.getElementById('pdf-sig-name')?.value || '';
   const appendix  = document.getElementById('pdf-include-appendix')?.checked !== false;
-  if (window.exportVantagePDF) {
-    await window.exportVantagePDF({ period, workspace, sigName, includeAppendix: appendix });
-  } else {
-    showToast('PDF module loading… please try again in a moment.', 'error');
-  }
+  await window.exportVantagePDF({ period, workspace, sigName, includeAppendix: appendix });
 });
 
 // ── Keyboard Shortcuts Panel ──────────────────────────────────────────────

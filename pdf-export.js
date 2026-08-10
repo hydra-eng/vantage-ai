@@ -855,63 +855,37 @@ function finishProgress() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DYNAMIC LIBRARY LOADER — no CDN race condition
-═══════════════════════════════════════════════════════════ */
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    // Already loaded?
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve(); return;
-    }
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload  = resolve;
-    s.onerror = () => reject(new Error('Failed to load: ' + src));
-    document.head.appendChild(s);
-  });
-}
-
-async function ensureJsPDF() {
-  const get = () => (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
-  if (get()) return get();
-
-  // Load from unpkg (reliable, always has latest versions)
-  await loadScript('https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js');
-  await loadScript('https://unpkg.com/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js');
-
-  if (!get()) throw new Error('jsPDF failed to register on window after CDN load');
-  return get();
-}
-
-/* ═══════════════════════════════════════════════════════════
    MAIN ENTRY POINT
+   jsPDF is loaded in <head> before this script — always available.
 ═══════════════════════════════════════════════════════════ */
-window.exportVantagePDF = async function exportVantagePDF(options = {}) {
+window.exportVantagePDF = async function(options) {
   const opts = {
-    period:          options.period          || 'July 2026',
-    workspace:       options.workspace       || CO.name,
-    sigName:         options.sigName         || '',
-    includeAppendix: options.includeAppendix !== false,
+    period:          (options && options.period)          || 'July 2026',
+    workspace:       (options && options.workspace)       || CO.name,
+    sigName:         (options && options.sigName)         || '',
+    includeAppendix: (options && options.includeAppendix) !== false,
   };
 
-  document.querySelectorAll('[data-pdf-trigger]').forEach(b => {
+  /* jsPDF UMD exposes window.jspdf.jsPDF */
+  var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if (!JsPDF) {
+    window.showToast && window.showToast('jsPDF library not found — check your connection and refresh.', 'error');
+    console.error('[PDF] window.jspdf:', window.jspdf, '| window.jsPDF:', window.jsPDF);
+    return;
+  }
+
+  document.querySelectorAll('[data-pdf-trigger]').forEach(function(b) {
     b.disabled = true; b.setAttribute('aria-busy', 'true');
   });
   showProgress();
 
-  const si = document.getElementById('spline-bg-iframe');
-  const sc = document.getElementById('spline-bg-container');
+  var si = document.getElementById('spline-bg-iframe');
+  var sc = document.getElementById('spline-bg-container');
   if (si) si.style.visibility = 'hidden';
   if (sc) sc.style.visibility = 'hidden';
 
   try {
-    // Load jsPDF + autotable on-demand — guaranteed ready before we use it
-    const JsPDF = await ensureJsPDF();
-
-    await new Promise(r => setTimeout(r, 40));
-
-    /* All 3 sheets — Portrait A4 (210 × 297 mm) */
-    const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     buildSheet1(doc, opts);
 
     doc.addPage([210, 297], 'portrait');
@@ -922,19 +896,19 @@ window.exportVantagePDF = async function exportVantagePDF(options = {}) {
       buildSheet3(doc, opts);
     }
 
-    const fn = `Vantage_Billing_Packet_${opts.period.replace(/\s+/g, '_')}.pdf`;
+    var fn = 'Vantage_Billing_Packet_' + opts.period.replace(/\s+/g, '_') + '.pdf';
     doc.save(fn);
     finishProgress();
-    window.showToast?.(`Downloaded — ${fn}`, 'success');
+    window.showToast && window.showToast('Downloaded \u2014 ' + fn, 'success');
 
-  } catch (err) {
+  } catch(err) {
     console.error('[PDF Export Error]', err);
     finishProgress();
-    window.showToast?.(`PDF error: ${err.message}`, 'error');
+    window.showToast && window.showToast('PDF error: ' + err.message, 'error');
   } finally {
     if (si) si.style.visibility = '';
     if (sc) sc.style.visibility = '';
-    document.querySelectorAll('[data-pdf-trigger]').forEach(b => {
+    document.querySelectorAll('[data-pdf-trigger]').forEach(function(b) {
       b.disabled = false; b.removeAttribute('aria-busy');
     });
   }
