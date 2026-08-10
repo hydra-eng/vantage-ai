@@ -2,9 +2,9 @@
  * Vantage AI — 3-Sheet Corporate Billing Packet
  * All pages: Portrait A4 (210 × 297 mm) — print-ready
  *
- * Black & White Corporate Accents + Semantic Status Highlights.
- * All header bands, rules, borders, and section bars are Black & White / Charcoal.
- * Status metrics (Normal, Warning, Hard Cap, Loop) retain clear semantic indicators.
+ * Premium Typography: Optimized character spacing (doc.setCharSpace), balanced line-heights,
+ * high-contrast corporate Black & White structural accents + semantic status highlights.
+ * Zero text overlapping guarantee and direct native doc.save() browser download.
  *
  * Requires jsPDF 2.5 + jspdf-autotable 3.8 (loaded in <head> before this file).
  */
@@ -135,8 +135,15 @@ function pLabel(p) { return p >= 100 ? 'HARD CAP' : p >= 80 ? 'WARNING' : 'NORMA
 function pColor(p) { return p >= 100 ? P.red : p >= 80 ? P.amber : P.green; }
 
 /* ═══════════════════════════════════════════════════════════
-   COMMON DRAWING PRIMITIVES
+   COMMON DRAWING PRIMITIVES (TYPOGRAPHY & LETTER SPACING)
 ═══════════════════════════════════════════════════════════ */
+
+/** Set char space safely if supported */
+function setSpacing(doc, space) {
+  if (typeof doc.setCharSpace === 'function') {
+    doc.setCharSpace(space);
+  }
+}
 
 /** Draw the standard page header band. Returns y after header. */
 function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
@@ -145,27 +152,33 @@ function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
   doc.rect(0, 0, W, 26, 'F');
 
   // Left accent stripe — Pure Black
-  doc.setFillColor(50, 50, 50);
+  doc.setFillColor(60, 60, 60);
   doc.rect(0, 0, 3.5, 26, 'F');
 
-  // Title
+  // Title with crisp letter spacing
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
+  doc.setFontSize(12.5);
+  setSpacing(doc, 0.2);
   doc.setTextColor(...P.white);
   doc.text(title, ML + 4, 11);
 
-  // Subtitle
+  // Subtitle with balanced spacing
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
+  doc.setFontSize(6.8);
+  setSpacing(doc, 0.08);
   doc.setTextColor(215, 215, 215);
   doc.text(subtitle, ML + 4, 18.5);
 
   // Right meta
-  doc.setFontSize(6.5);
+  doc.setFontSize(6.3);
+  setSpacing(doc, 0.05);
   doc.setTextColor(215, 215, 215);
   doc.text(`Invoice: ${INV}`, W - MR, 9, { align: 'right' });
   doc.text(`Period: ${opts.period}   |   Entity: ${opts.workspace}`, W - MR, 14.5, { align: 'right' });
   doc.text(pgLabel, W - MR, 20, { align: 'right' });
+
+  // Reset spacing
+  setSpacing(doc, 0);
 
   // Thin Black accent rule under header
   doc.setFillColor(...P.headerBg);
@@ -177,20 +190,22 @@ function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
 /** Draw a section label bar. Returns y after it. */
 function sLabel(doc, ML, BW, y, text) {
   doc.setFillColor(...P.sectionBg);
-  doc.rect(ML, y, BW, 5.5, 'F');
+  doc.rect(ML, y, BW, 5.8, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.2);
-  doc.rect(ML, y, BW, 5.5);
+  doc.rect(ML, y, BW, 5.8);
 
   // Left accent mark — Solid Black
   doc.setFillColor(...P.headerBg);
-  doc.rect(ML, y, 2.5, 5.5, 'F');
+  doc.rect(ML, y, 2.5, 5.8, 'F');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
+  doc.setFontSize(6.8);
+  setSpacing(doc, 0.12);
   doc.setTextColor(...P.headerBg);
-  doc.text(text, ML + 5.5, y + 3.9);
-  return y + 7.5;
+  doc.text(text, ML + 5.5, y + 4.1);
+  setSpacing(doc, 0);
+  return y + 7.8;
 }
 
 /** Draw the standard page footer. */
@@ -200,8 +215,9 @@ function drawFooter(doc, W, ML, MR, pgLabel) {
   doc.setLineWidth(0.3);
   doc.line(ML, 283, W - MR, 283);
 
+  setSpacing(doc, 0.04);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6);
+  doc.setFontSize(5.8);
   doc.setTextColor(...P.caption);
   doc.text(`${CO.name}   |   GSTIN: ${CO.gstin}   |   PAN: ${CO.pan}   |   SAC: ${CO.sac}`, ML, 287);
   doc.text(`${CO.email}   |   ${CO.tel}`, ML, 291);
@@ -209,13 +225,14 @@ function drawFooter(doc, W, ML, MR, pgLabel) {
   doc.text('Computer-generated document — valid without manual signature unless stated otherwise.', W / 2, 291, { align: 'center' });
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6.5);
+  doc.setFontSize(6.3);
   doc.setTextColor(...P.headerBg);
   doc.text(pgLabel, W - MR, 287, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6);
+  doc.setFontSize(5.8);
   doc.setTextColor(...P.caption);
   doc.text(`Invoice: ${INV}`, W - MR, 291, { align: 'right' });
+  setSpacing(doc, 0);
 }
 
 /** Shared autoTable style objects */
@@ -226,14 +243,14 @@ function tStyles() {
       textColor: P.thText,
       fontStyle: 'bold',
       fontSize: 6.8,
-      cellPadding: { top: 2.8, bottom: 2.8, left: 2.5, right: 2.5 },
+      cellPadding: { top: 3.0, bottom: 3.0, left: 2.8, right: 2.8 },
       lineColor: P.thBg,
       lineWidth: 0,
     },
     bodyStyles: {
       fontSize: 6.8,
       textColor: P.ink,
-      cellPadding: { top: 2.2, bottom: 2.2, left: 2.5, right: 2.5 },
+      cellPadding: { top: 2.4, bottom: 2.4, left: 2.8, right: 2.8 },
       lineColor: P.border,
       lineWidth: 0.2,
     },
@@ -243,7 +260,7 @@ function tStyles() {
       textColor: P.white,
       fontStyle: 'bold',
       fontSize: 6.8,
-      cellPadding: { top: 2.8, bottom: 2.8, left: 2.5, right: 2.5 },
+      cellPadding: { top: 3.0, bottom: 3.0, left: 2.8, right: 2.8 },
       lineWidth: 0,
     },
   };
@@ -263,7 +280,7 @@ function buildSheet1(doc, opts) {
 
   /* ── BILLED TO / TAX CLASSIFICATION split ─── */
   const hBW = (BW - 4) / 2;
-  const boxH1 = 28;
+  const boxH1 = 29;
 
   // Box 1: Billed To
   doc.setFillColor(252, 252, 252);
@@ -275,6 +292,7 @@ function buildSheet1(doc, opts) {
   doc.rect(ML, y, hBW, 4.5, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(6.5);
+  setSpacing(doc, 0.1);
   doc.setTextColor(...P.white);
   doc.text('BILLED TO — CUSTOMER ENTITY', ML + 3, y + 3.2);
 
@@ -288,9 +306,10 @@ function buildSheet1(doc, opts) {
   billedLines.forEach(([txt, bold], i) => {
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setFontSize(bold ? 7.5 : 6.5);
+    setSpacing(doc, bold ? 0.05 : 0.02);
     const tc1 = bold ? P.ink : P.subtext;
     doc.setTextColor(...tc1);
-    doc.text(txt, ML + 3, y + 8.5 + i * 3.8);
+    doc.text(txt, ML + 3.5, y + 8.8 + i * 3.9);
   });
 
   // Box 2: Invoice & Tax Reference
@@ -303,6 +322,7 @@ function buildSheet1(doc, opts) {
   doc.rect(rx, y, hBW, 4.5, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(6.5);
+  setSpacing(doc, 0.1);
   doc.setTextColor(...P.white);
   doc.text('INVOICE & TAX REFERENCE', rx + 3, y + 3.2);
 
@@ -315,18 +335,20 @@ function buildSheet1(doc, opts) {
     ['Reverse Charge',     'Not Applicable'],
   ];
   refLines.forEach(([k, v], i) => {
-    const ly = y + 8.2 + i * 3.2;
+    const ly = y + 8.5 + i * 3.3;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6.3);
+    setSpacing(doc, 0.02);
     doc.setTextColor(...P.subtext);
-    doc.text(k + ':', rx + 3, ly);
+    doc.text(k + ':', rx + 3.5, ly);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.3);
     doc.setTextColor(...P.ink);
-    doc.text(v, rx + hBW - 3, ly, { align: 'right' });
+    doc.text(v, rx + hBW - 3.5, ly, { align: 'right' });
   });
 
-  y += boxH1 + 4;
+  setSpacing(doc, 0);
+  y += boxH1 + 4.5;
 
   /* ── 5 KPI TILES ─────────────────────────────── */
   const totalNet   = PROVIDERS.reduce((s, p) => s + p.net, 0);
@@ -350,31 +372,33 @@ function buildSheet1(doc, opts) {
   kpis.forEach((k, i) => {
     const cx = ML + i * (kW + 2);
     doc.setFillColor(...P.white);
-    doc.rect(cx, y, kW, 16.5, 'F');
+    doc.rect(cx, y, kW, 17, 'F');
     doc.setDrawColor(...P.border);
     doc.setLineWidth(0.25);
-    doc.rect(cx, y, kW, 16.5);
+    doc.rect(cx, y, kW, 17);
     // Bottom accent bar
     doc.setFillColor(...k.clr);
-    doc.rect(cx, y + 14.5, kW, 2, 'F');
+    doc.rect(cx, y + 15, kW, 2, 'F');
     // Label
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(5.8);
+    setSpacing(doc, 0.05);
     doc.setTextColor(...P.caption);
-    doc.text(k.lbl, cx + kW / 2, y + 5, { align: 'center' });
+    doc.text(k.lbl, cx + kW / 2, y + 5.2, { align: 'center' });
     // Value
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(...k.clr);
-    doc.text(k.val, cx + kW / 2, y + 10.2, { align: 'center' });
+    doc.text(k.val, cx + kW / 2, y + 10.6, { align: 'center' });
     // Note
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(5.5);
     doc.setTextColor(...k.clr);
-    doc.text(k.note, cx + kW / 2, y + 13.5, { align: 'center' });
+    doc.text(k.note, cx + kW / 2, y + 14.2, { align: 'center' });
   });
 
-  y += 20.5;
+  setSpacing(doc, 0);
+  y += 21;
 
   /* ── PROVIDER COST TABLE ──────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 1  —  AI PROVIDER COST & TAX BREAKDOWN');
@@ -438,11 +462,11 @@ function buildSheet1(doc, opts) {
     footStyles, showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 4.5;
+  y = doc.lastAutoTable.finalY + 5;
 
   /* ── TAX SUMMARY + BANK DETAILS ─────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 2  —  TAX AMOUNT SUMMARY & PAYMENT DETAILS');
-  const boxH2 = 31, halfW = (BW - 4) / 2;
+  const boxH2 = 32, halfW = (BW - 4) / 2;
 
   // Left: Tax breakdown
   doc.setFillColor(252, 252, 252);
@@ -451,9 +475,9 @@ function buildSheet1(doc, opts) {
   doc.setLineWidth(0.3);
   doc.rect(ML, y, halfW, boxH2);
   doc.setFillColor(...P.thBg);
-  doc.rect(ML, y, halfW, 4, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.white);
-  doc.text('TAX COMPUTATION (IGST BASIS)', ML + 3, y + 2.8);
+  doc.rect(ML, y, halfW, 4.5, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); setSpacing(doc, 0.08); doc.setTextColor(...P.white);
+  doc.text('TAX COMPUTATION (IGST BASIS)', ML + 3.5, y + 3.2);
 
   const taxRows = [
     ['Taxable Net Amount',       inr(totalNet),   false],
@@ -464,17 +488,18 @@ function buildSheet1(doc, opts) {
     ['TOTAL AMOUNT PAYABLE',      inr(totalGross), true],
   ];
   taxRows.forEach(([k, v, bold], i) => {
-    const ly = y + 6.8 + i * 3.9;
+    const ly = y + 7.2 + i * 4.0;
     if (bold) {
       doc.setFillColor(...P.sectionBg);
-      doc.rect(ML, ly - 2.5, halfW, 5, 'F');
+      doc.rect(ML, ly - 2.6, halfW, 5.2, 'F');
     }
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setFontSize(6.8);
+    setSpacing(doc, bold ? 0.05 : 0.02);
     const tc2 = bold ? P.headerBg : P.subtext;
     doc.setTextColor(...tc2);
-    doc.text(k, ML + 3, ly);
-    doc.text(v, ML + halfW - 3, ly, { align: 'right' });
+    doc.text(k, ML + 3.5, ly);
+    doc.text(v, ML + halfW - 3.5, ly, { align: 'right' });
   });
 
   // Right: Bank details
@@ -484,9 +509,9 @@ function buildSheet1(doc, opts) {
   doc.setDrawColor(...P.border);
   doc.rect(rxBank, y, halfW, boxH2);
   doc.setFillColor(...P.thBg);
-  doc.rect(rxBank, y, halfW, 4, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.white);
-  doc.text('PAYMENT DETAILS — NEFT / RTGS / IMPS', rxBank + 3, y + 2.8);
+  doc.rect(rxBank, y, halfW, 4.5, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); setSpacing(doc, 0.08); doc.setTextColor(...P.white);
+  doc.text('PAYMENT DETAILS — NEFT / RTGS / IMPS', rxBank + 3.5, y + 3.2);
 
   const bankRows = [
     ['Account Name',  CO.name],
@@ -497,19 +522,20 @@ function buildSheet1(doc, opts) {
     ['Due By',        DDATE],
   ];
   bankRows.forEach(([k, v], i) => {
-    const ly = y + 6.8 + i * 3.9;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...P.subtext);
-    doc.text(k + ':', rxBank + 3, ly);
+    const ly = y + 7.2 + i * 4.0;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); setSpacing(doc, 0.02); doc.setTextColor(...P.subtext);
+    doc.text(k + ':', rxBank + 3.5, ly);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...P.ink);
-    doc.text(v, rxBank + halfW - 3, ly, { align: 'right' });
+    doc.text(v, rxBank + halfW - 3.5, ly, { align: 'right' });
   });
 
-  y += boxH2 + 4.5;
+  setSpacing(doc, 0);
+  y += boxH2 + 5;
 
   /* ── EXECUTIVE SIGN-OFF ─────────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 3  —  EXECUTIVE AUTHORIZATION & COMPLIANCE SIGN-OFF');
   const sigW = (BW - 2 * 4) / 3;
-  const sigH = 21;
+  const sigH = 22;
   const sigs = [
     { role: 'FINANCE DIRECTOR / CFO',      name: opts.sigName || 'Authorised Signatory' },
     { role: 'CISO / COMPLIANCE LEAD',       name: 'Security & Risk Officer' },
@@ -523,21 +549,22 @@ function buildSheet1(doc, opts) {
     doc.setLineWidth(0.3);
     doc.rect(sx, y, sigW, sigH);
     doc.setFillColor(...P.thBg);
-    doc.rect(sx, y, sigW, 4, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(...P.white);
-    doc.text(s.role, sx + sigW / 2, y + 2.8, { align: 'center' });
+    doc.rect(sx, y, sigW, 4.5, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); setSpacing(doc, 0.08); doc.setTextColor(...P.white);
+    doc.text(s.role, sx + sigW / 2, y + 3.0, { align: 'center' });
 
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...P.subtext);
-    doc.text(s.name, sx + 3, y + 9);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); setSpacing(doc, 0.02); doc.setTextColor(...P.subtext);
+    doc.text(s.name, sx + 3.5, y + 9.5);
 
     doc.setDrawColor(...P.subtext);
     doc.setLineWidth(0.3);
-    doc.line(sx + 3, y + 14, sx + sigW - 3, y + 14);
+    doc.line(sx + 3.5, y + 15, sx + sigW - 3.5, y + 15);
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(...P.caption);
-    doc.text('Signature & Seal       Date: ___/___/______', sx + 3, y + 18);
+    doc.text('Signature & Seal       Date: ___/___/______', sx + 3.5, y + 19);
   });
 
+  setSpacing(doc, 0);
   drawFooter(doc, W, ML, MR, 'Sheet 1 of 3');
 }
 
@@ -626,7 +653,7 @@ function buildSheet2(doc, opts) {
     footStyles, showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 5;
+  y = doc.lastAutoTable.finalY + 5.5;
 
   /* ── MODEL RATE CARD ──────────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 2  —  AI MODEL TIER UNIT ECONOMICS (₹ PER 1K TOKENS, EXCL. GST)');
@@ -669,11 +696,11 @@ function buildSheet2(doc, opts) {
     showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 5;
+  y = doc.lastAutoTable.finalY + 5.5;
 
   /* ── GOVERNANCE RULES BOX ────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 3  —  AUTOMATED AI GOVERNANCE & ENFORCEMENT POLICY');
-  const boxH3 = 29;
+  const boxH3 = 30;
 
   doc.setFillColor(252, 252, 252);
   doc.rect(ML, y, BW, boxH3, 'F');
@@ -687,15 +714,15 @@ function buildSheet2(doc, opts) {
     { clr: P.amber, hd: 'WARNING  (≥ 80% Budget Used)',   body: 'Auto-fallback to cost-tier models (e.g. Flash, Haiku). Finance alert dispatched.' },
     { clr: P.red,   hd: 'HARD CAP  (≥ 100% Budget Used)', body: 'API key suspended immediately at proxy. Requests blocked until next billing cycle.' },
   ];
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); setSpacing(doc, 0.08); doc.setTextColor(...P.headerBg);
   doc.text('DYNAMIC ROUTING POLICIES:', ML + 4, y + 5.5);
   rules.forEach((r, i) => {
-    const ry = y + 9.5 + i * 5.8;
+    const ry = y + 9.8 + i * 6.0;
     doc.setFillColor(...r.clr);
     doc.rect(ML + 4, ry - 2.8, 2.5, 3.2, 'F');
-    doc.setFont('helvetica', 'bold');   doc.setFontSize(6.2); doc.setTextColor(...r.clr);
+    doc.setFont('helvetica', 'bold');   doc.setFontSize(6.2); setSpacing(doc, 0.04); doc.setTextColor(...r.clr);
     doc.text(r.hd, ML + 9, ry);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...P.subtext);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); setSpacing(doc, 0.02); doc.setTextColor(...P.subtext);
     doc.text(r.body, ML + 9, ry + 3.2);
   });
 
@@ -705,16 +732,17 @@ function buildSheet2(doc, opts) {
     'Recursive tool-call depth exceeds 5 levels in agentic pipelines',
   ];
   const rx2 = ML + halfBW + 5;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.red);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); setSpacing(doc, 0.08); doc.setTextColor(...P.red);
   doc.text('AGENTIC LOOP DETECTION TRIGGERS:', rx2, y + 5.5);
   loopRules.forEach((l, i) => {
-    const ry = y + 9.5 + i * 5.8;
+    const ry = y + 9.8 + i * 6.0;
     doc.setFillColor(...P.red);
     doc.rect(rx2, ry - 2.8, 2.5, 3.2, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...P.ink);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); setSpacing(doc, 0.02); doc.setTextColor(...P.ink);
     doc.text(l, rx2 + 5, ry);
   });
 
+  setSpacing(doc, 0);
   drawFooter(doc, W, ML, MR, 'Sheet 2 of 3');
 }
 
