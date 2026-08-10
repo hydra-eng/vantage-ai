@@ -791,60 +791,51 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// CANVAS SCROLL HERO ENGINE — 5-CHAPTER CINEMATIC (192 FRAMES)
+// CANVAS SCROLL HERO — PROPER PARALLAX ENGINE (192 FRAMES)
 // ============================================================
 (function initCanvasHeroEngine() {
+  'use strict';
+
   const TOTAL_FRAMES = 192;
-  const canvas = document.getElementById('hero-canvas');
+  const canvas    = document.getElementById('hero-canvas');
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  const loaderEl  = document.getElementById('hero-loader');
-  const loaderFill = document.getElementById('hero-loader-fill');
-  const scrollCue  = document.getElementById('hero-scroll-cue');
-  const container  = document.getElementById('hero-scroll-sec');
+  const ctx         = canvas.getContext('2d');
+  const loaderEl    = document.getElementById('hero-loader');
+  const loaderFill  = document.getElementById('hero-loader-fill');
+  const scrollCue   = document.getElementById('hero-scroll-cue');
+  const overlay     = document.getElementById('hero-overlay');
+  const container   = document.getElementById('hero-scroll-sec');
 
-  // Chapter stage elements (5 now)
-  const stages = [1,2,3,4,5].map(n => document.getElementById(`hero-stage-${n}`));
-
-  // Frame boundaries per chapter (frame index 0-based)
-  // Chapter 1: frames 0–37  (38 frames)
-  // Chapter 2: frames 38–75 (38 frames)
-  // Chapter 3: frames 76–114 (39 frames)
-  // Chapter 4: frames 115–153 (39 frames)
-  // Chapter 5: frames 154–191 (38 frames)
-  const CHAPTER_STARTS = [0, 38, 76, 115, 154, 192];
-
+  // ── Frame image pool ──────────────────────────────────────
   const frames = [];
-  let loadedCount = 0;
+  let   loadedCount = 0;
 
-  function pad(num, size) {
-    let s = num + '';
+  function pad(n, size) {
+    let s = String(n);
     while (s.length < size) s = '0' + s;
     return s;
   }
 
-  // Preload all 192 frames
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
-    const img = new Image();
-    const frameNum = pad(i, 3);
-    const primary  = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
-    const fallback = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
-    img.src = primary;
+    const img  = new Image();
+    const name = `images sequence -jpg/ezgif-frame-${pad(i, 3)}.jpg`;
+    img.src = name;
     img.onload = () => {
       loadedCount++;
-      const pct = Math.min(100, Math.floor((loadedCount / TOTAL_FRAMES) * 100));
+      const pct = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
       if (loaderFill) loaderFill.style.width = pct + '%';
-      if (i === 1) renderFrame(0);
+      if (i === 1) drawFrame(0);          // show first frame ASAP
       if (loadedCount >= TOTAL_FRAMES) {
         setTimeout(() => {
           if (loaderEl) loaderEl.classList.add('hidden-overlay');
-        }, 250);
+        }, 400);
       }
     };
     img.onerror = () => {
-      if (img.src.includes('images sequence -jpg/') && !img.src.includes('public/')) {
-        img.src = fallback;
+      // Fallback: try public/ prefix (Firebase hosting serves from public/)
+      if (!img.src.includes('public/')) {
+        img.src = 'public/' + name;
       } else {
         loadedCount++;
       }
@@ -852,129 +843,106 @@ document.addEventListener('click', (e) => {
     frames.push(img);
   }
 
-  // Object-fit: cover drawing
-  function renderFrame(index) {
-    const img = frames[index];
-    if (!img || !img.complete || img.naturalWidth === 0) return;
+  // ── Cover-fit canvas draw ─────────────────────────────────
+  function drawFrame(idx) {
+    const img = frames[Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.floor(idx)))];
+    if (!img || !img.complete || !img.naturalWidth) return;
 
-    const dpr  = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-      canvas.width  = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+    const dpr  = Math.min(window.devicePixelRatio || 1, 2); // cap at 2× for perf
+    const bRect = canvas.getBoundingClientRect();
+    const W = bRect.width;
+    const H = bRect.height;
+
+    if (canvas.width !== W * dpr || canvas.height !== H * dpr) {
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
     }
 
-    const cW = rect.width, cH = rect.height;
-    const iW = img.naturalWidth, iH = img.naturalHeight;
-    const scale = Math.max(cW / iW, cH / iH);
-    const x = (cW - iW * scale) / 2;
-    const y = (cH - iH * scale) / 2;
+    const iW = img.naturalWidth;
+    const iH = img.naturalHeight;
+    const scale = Math.max(W / iW, H / iH);
+    const sx = (W - iW * scale) / 2;
+    const sy = (H - iH * scale) / 2;
 
     ctx.save();
     ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, cW, cH);
-    ctx.drawImage(img, x, y, iW * scale, iH * scale);
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(img, sx, sy, iW * scale, iH * scale);
     ctx.restore();
   }
 
-  let targetFrameIndex  = 0;
-  let currentFrameIndex = 0;
-  let lastRenderedFrame = -1;
+  // ── Lerp state ────────────────────────────────────────────
+  let targetFrame  = 0;
+  let currentFrame = 0;
+  let lastDrawn    = -1;
 
-  // Smooth parallax per-chapter
-  function applyParallax(fi) {
-    stages.forEach((stage, i) => {
-      if (!stage) return;
-      const chStart = CHAPTER_STARTS[i];
-      const chEnd   = CHAPTER_STARTS[i + 1];
-      const chLen   = chEnd - chStart;
+  // ── Parallax state ────────────────────────────────────────
+  // Text overlay scrolls up slowly as canvas advances — creates depth
+  let targetTY  = 0;   // px — overlay translateY target
+  let currentTY = 0;
 
-      const localProgress = Math.max(0, Math.min(1, (fi - chStart) / chLen));
-      // Slide in from below on entry, slide out upward on exit
-      const entryProgress = Math.max(0, Math.min(1, (fi - chStart) / 12));  // 12 frames to settle
-      const exitProgress  = Math.max(0, Math.min(1, (fi - (chEnd - 12)) / 12)); // 12 frames to leave
+  // ── RAF loop ──────────────────────────────────────────────
+  function tick() {
+    // Smooth-lerp both frame and parallax independently
+    const lerp = 0.12;
 
-      const yIn  = (1 - entryProgress) * 50;
-      const yOut = exitProgress * -60;
-      const y    = yIn + yOut;
+    currentFrame += (targetFrame  - currentFrame) * lerp;
+    currentTY    += (targetTY     - currentTY)    * (lerp * 0.6);  // text moves slower
 
-      const opIn  = Math.min(1, entryProgress);
-      const opOut = Math.max(0, 1 - exitProgress);
-      const opacity = opIn * opOut;
-
-      stage.style.transform = `translate3d(0, ${y}px, 0)`;
-      stage.style.opacity   = String(Math.max(0, Math.min(1, opacity)));
-    });
-  }
-
-  // Determine which chapter is active
-  function updateActiveStage(fi) {
-    const chapterIndex = CHAPTER_STARTS.findIndex((start, i) =>
-      fi >= start && fi < CHAPTER_STARTS[i + 1]
-    );
-    stages.forEach((stage, i) => {
-      if (!stage) return;
-      stage.classList.toggle('stage-active', i === chapterIndex);
-    });
-  }
-
-  // Scroll cue fades out after first 15 frames
-  function updateScrollCue(fi) {
-    if (!scrollCue) return;
-    const opacity = Math.max(0, 1 - fi / 15);
-    scrollCue.style.opacity = String(opacity);
-  }
-
-  // Lerp tick loop — 0.16 for cinematic feel
-  function tickLoop() {
-    if (Math.abs(targetFrameIndex - currentFrameIndex) > 0.01) {
-      currentFrameIndex += (targetFrameIndex - currentFrameIndex) * 0.16;
-      const roundedFrame = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.floor(currentFrameIndex)));
-      if (roundedFrame !== lastRenderedFrame) {
-        lastRenderedFrame = roundedFrame;
-        renderFrame(roundedFrame);
-      }
-      updateActiveStage(roundedFrame);
-      applyParallax(currentFrameIndex);
-      updateScrollCue(currentFrameIndex);
+    const fi = Math.floor(currentFrame);
+    if (fi !== lastDrawn) {
+      drawFrame(fi);
+      lastDrawn = fi;
     }
-    requestAnimationFrame(tickLoop);
-  }
-  requestAnimationFrame(tickLoop);
 
-  // Scroll → frame mapping
-  function updateScroll() {
+    // Drive CSS custom properties for the overlay
+    if (overlay) {
+      const ty = Math.round(currentTY * 10) / 10;
+      // Fade out text gently in the last quarter of the scroll
+      const op = Math.max(0, 1 - (currentFrame / TOTAL_FRAMES) * 1.4).toFixed(3);
+      overlay.style.setProperty('--hero-ty', ty + 'px');
+      overlay.style.setProperty('--hero-op', op);
+    }
+
+    // Fade scroll cue quickly after first few frames
+    if (scrollCue) {
+      const cueOp = Math.max(0, 1 - currentFrame / 12);
+      scrollCue.style.opacity = cueOp.toFixed(3);
+    }
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ── Scroll → frame + parallax mapping ────────────────────
+  function onScroll() {
     if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const scrollableDistance = container.offsetHeight - window.innerHeight;
-    if (scrollableDistance <= 0) return;
-    const progress = Math.max(0, Math.min(1, (-rect.top) / scrollableDistance));
-    targetFrameIndex = Math.min(TOTAL_FRAMES - 1, progress * (TOTAL_FRAMES - 1));
+    const containerH = container.offsetHeight;
+    const scrollable = containerH - window.innerHeight;
+    if (scrollable <= 0) return;
+
+    // scrolled distance from top of the hero container
+    const scrolled  = Math.max(0, -container.getBoundingClientRect().top);
+    const progress  = Math.min(1, scrolled / scrollable);
+
+    targetFrame = progress * (TOTAL_FRAMES - 1);
+
+    // Parallax: text drifts up by up to 80px as scroll goes 0→100%
+    targetTY = -(progress * 80);
   }
 
-  // Wire btn-login-final to the same Google login flow
-  const btnFinal = document.getElementById('btn-login-final');
-  if (btnFinal) {
-    btnFinal.addEventListener('click', () => {
-      const btnLogin = document.getElementById('btn-login');
-      if (btnLogin) btnLogin.click();
-    });
-  }
-
+  // Attach to all relevant scroll sources
   const loginView = document.getElementById('login-view');
-  if (loginView) loginView.addEventListener('scroll', updateScroll, { passive: true });
-  window.addEventListener('scroll', updateScroll, { passive: true });
-  document.addEventListener('scroll', updateScroll, { passive: true });
-  window.addEventListener('resize', () => {
-    updateScroll();
-    renderFrame(Math.floor(currentFrameIndex));
+  if (loginView) loginView.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll',   onScroll, { passive: true });
+  document.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize',   () => {
+    drawFrame(Math.floor(currentFrame));
+    onScroll();
   }, { passive: true });
 
-  updateScroll();
+  onScroll(); // initial call
 })();
-
-
-
 // ============================================================
 // INIT
 // ============================================================
