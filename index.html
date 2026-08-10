@@ -629,6 +629,48 @@
      ═══════════════════════════════════════════════════════════ -->
 <div id="app-shell" class="hidden">
 
+<!-- SIDE NAV -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-grp-lbl">Monitor</div>
+  <button class="ni active" data-view="overview" id="ni-overview">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Overview</span>
+  </button>
+  <button class="ni" data-view="employees" id="ni-employees">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Employees</span>
+  </button>
+  <button class="ni" data-view="providers" id="ni-providers">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Providers</span>
+  </button>
+  <div class="nav-div"></div>
+  <div class="nav-grp-lbl">Manage</div>
+  <button class="ni" data-view="add-integration" id="ni-add-integration">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Add Integration</span>
+  </button>
+  <button class="ni" data-view="add-employee" id="ni-add-employee">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Add Employee</span>
+  </button>
+  <button class="ni" data-view="budgets" id="ni-budgets">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Budgets &amp; Alerts</span>
+    <span class="ni-badge" id="alert-badge">3</span>
+  </button>
+  <button class="ni" data-view="settings" id="ni-settings">
+    <span class="ni-icon">◈</span><span class="ni-lbl">Settings &amp; Profile</span>
+  </button>
+  <div class="nav-foot">
+    <div class="nav-foot-user" style="display:flex; justify-content:space-between; align-items:center; width:100%">
+      <div style="display:flex; align-items:center; gap:10px">
+        <div class="u-av u-av-sm">IT</div>
+        <span>IT Admin</span>
+      </div>
+      <div class="logout-btn" id="btn-logout" title="Sign Out">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="main" role="main">
+
   <!-- ═══ VIEW 1: OVERVIEW ════════════════════════ -->
   <section id="view-overview" class="view active">
     <div class="vh">
@@ -1065,7 +1107,10 @@
   <div class="sp-body" id="sp-body"></div>
 </aside>
 
+
+</main>
 </div><!-- /#app-shell -->
+
 
 
 <script type="module">
