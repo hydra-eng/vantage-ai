@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // INR — Indian number formatting (en-IN locale)
 // ₹1,12,430 — lakh/crore grouping, IBM Plex Mono in UI
 // ============================================================
@@ -875,19 +875,68 @@ document.addEventListener('click', (e) => {
   let targetFrame  = 0;
   let currentFrame = 0;
   let lastDrawn    = -1;
+  let lastChapter  = -1;
 
-  // ── Parallax state ────────────────────────────────────────
-  // Text overlay scrolls up slowly as canvas advances — creates depth
-  let targetTY  = 0;   // px — overlay translateY target
-  let currentTY = 0;
+  // ── Chapter config ────────────────────────────────────────
+  // 4 chapters, each gets 25% of the 192 frames
+  const chapters = [
+    { el: document.getElementById('hero-ch-1'), start: 0,   end: 47  },
+    { el: document.getElementById('hero-ch-2'), start: 48,  end: 95  },
+    { el: document.getElementById('hero-ch-3'), start: 96,  end: 143 },
+    { el: document.getElementById('hero-ch-4'), start: 144, end: 191 },
+  ];
+  const providerStrip = document.getElementById('hero-provider-strip');
 
-  // ── RAF loop ──────────────────────────────────────────────
+  // ── Chapter switching ─────────────────────────────────────
+  function updateChapters(fi) {
+    // Find active chapter index
+    let activeIdx = 0;
+    for (let i = 0; i < chapters.length; i++) {
+      if (fi >= chapters[i].start) activeIdx = i;
+    }
+
+    if (activeIdx === lastChapter) {
+      // Still same chapter — only update the inner parallax drift
+      const ch = chapters[activeIdx];
+      const chLen = ch.end - ch.start;
+      const localProg = Math.max(0, Math.min(1, (currentFrame - ch.start) / chLen));
+      // Text drifts up gently within each chapter (max -30px)
+      const ty = -(localProg * 30);
+      if (ch.el) {
+        const inner = ch.el.querySelector('.hero-chapter-inner');
+        if (inner) inner.style.setProperty('--ch-ty', ty.toFixed(1) + 'px');
+      }
+      return;
+    }
+
+    // Chapter changed — swap classes
+    chapters.forEach((ch, i) => {
+      if (!ch.el) return;
+      if (i === activeIdx) {
+        ch.el.classList.remove('ch-exit');
+        ch.el.classList.add('ch-active');
+      } else if (i === lastChapter) {
+        // Previous chapter exits upward
+        ch.el.classList.remove('ch-active');
+        ch.el.classList.add('ch-exit');
+      } else {
+        // All other chapters stay hidden (reset exit so they can enter cleanly)
+        ch.el.classList.remove('ch-active', 'ch-exit');
+      }
+    });
+
+    lastChapter = activeIdx;
+
+    // Show provider strip when in chapter 4
+    if (providerStrip) {
+      providerStrip.classList.toggle('strip-visible', activeIdx === 3);
+    }
+  }
+
+  // ── RAF tick loop ─────────────────────────────────────────
   function tick() {
-    // Smooth-lerp both frame and parallax independently
     const lerp = 0.12;
-
-    currentFrame += (targetFrame  - currentFrame) * lerp;
-    currentTY    += (targetTY     - currentTY)    * (lerp * 0.6);  // text moves slower
+    currentFrame += (targetFrame - currentFrame) * lerp;
 
     const fi = Math.floor(currentFrame);
     if (fi !== lastDrawn) {
@@ -895,41 +944,27 @@ document.addEventListener('click', (e) => {
       lastDrawn = fi;
     }
 
-    // Drive CSS custom properties for the overlay
-    if (overlay) {
-      const ty = Math.round(currentTY * 10) / 10;
-      // Fade out text gently in the last quarter of the scroll
-      const op = Math.max(0, 1 - (currentFrame / TOTAL_FRAMES) * 1.4).toFixed(3);
-      overlay.style.setProperty('--hero-ty', ty + 'px');
-      overlay.style.setProperty('--hero-op', op);
-    }
+    updateChapters(fi);
 
-    // Fade scroll cue quickly after first few frames
+    // Fade scroll cue after first 15 frames
     if (scrollCue) {
-      const cueOp = Math.max(0, 1 - currentFrame / 12);
-      scrollCue.style.opacity = cueOp.toFixed(3);
+      scrollCue.style.opacity = Math.max(0, 1 - currentFrame / 15).toFixed(3);
     }
 
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
-  // ── Scroll → frame + parallax mapping ────────────────────
+  // ── Scroll → frame mapping ────────────────────────────────
   function onScroll() {
     if (!container) return;
-    const containerH = container.offsetHeight;
-    const scrollable = containerH - window.innerHeight;
+    const scrollable = container.offsetHeight - window.innerHeight;
     if (scrollable <= 0) return;
-
-    // scrolled distance from top of the hero container
     const scrolled  = Math.max(0, -container.getBoundingClientRect().top);
     const progress  = Math.min(1, scrolled / scrollable);
-
     targetFrame = progress * (TOTAL_FRAMES - 1);
-
-    // Parallax: text drifts up by up to 80px as scroll goes 0→100%
-    targetTY = -(progress * 80);
   }
+
 
   // Attach to all relevant scroll sources
   const loginView = document.getElementById('login-view');

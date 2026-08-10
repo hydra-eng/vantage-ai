@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    VANTAGE — IBM Carbon v11 White Theme (Dense Enterprise UI)
    Shell: Gray 100 (#161616) — header + nav
    Content layers: #ffffff (surface) on #f4f4f4 (page/Layer-01)
@@ -525,13 +525,13 @@ select.ff-in option{background:var(--surface)}
 .hero-badge span { color: #38bdf8; font-weight: 600; }
 
 /* ════════════════════════════════════════════════════════════
-   CANVAS SCROLL HERO — PROPER PARALLAX BUILD
+   CANVAS SCROLL HERO — 4-CHAPTER APPLE-STYLE PARALLAX
    ════════════════════════════════════════════════════════════ */
 
-/* Tall container that gives the scroll room to breathe */
+/* 600vh gives each of the 4 chapters ~150vh of scroll room */
 .hero-scroll-container {
   position: relative;
-  height: 350vh;
+  height: 600vh;
   background: #0a0a0c;
 }
 
@@ -606,8 +606,8 @@ select.ff-in option{background:var(--surface)}
   border-radius: 0 2px 2px 0;
 }
 
-/* ── HERO OVERLAY: TEXT + CONTENT ── */
-.hero-overlay {
+/* ── CHAPTER SYSTEM — Apple-style parallax ── */
+.hero-chapter {
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -616,11 +616,31 @@ select.ff-in option{background:var(--surface)}
   justify-content: center;
   align-items: flex-start;
   padding: 0 80px;
-  max-width: 780px;
-  /* Parallax: JS drives translateY via --hero-ty */
-  transform: translateY(var(--hero-ty, 0px));
+  pointer-events: none;
+  /* Hidden state: slide in from below */
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.55s cubic-bezier(0.16,1,0.3,1),
+    transform 0.55s cubic-bezier(0.16,1,0.3,1);
   will-change: transform, opacity;
-  opacity: var(--hero-op, 1);
+}
+.hero-chapter.ch-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.hero-chapter.ch-exit {
+  opacity: 0;
+  transform: translateY(-40px);
+}
+
+/* Inner wrapper constrains text width, adds additional parallax drift */
+.hero-chapter-inner {
+  max-width: 620px;
+  transform: translateY(var(--ch-ty, 0px));
+  transition: transform 0.1s linear;
+  will-change: transform;
 }
 
 /* Eyebrow / category label */
@@ -799,6 +819,120 @@ select.ff-in option{background:var(--surface)}
   0%, 100% { transform: translateX(-50%) translateY(0px); }
   50%       { transform: translateX(-50%) translateY(7px); }
 }
+
+/* ── BIG DISPLAY STAT (Chapters 2 & 3) ── */
+.hero-big-stat {
+  font-family: var(--mono);
+  font-size: clamp(56px, 9vw, 100px);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 8px;
+  text-shadow: 0 4px 32px rgba(56,189,248,0.2);
+}
+.hero-big-stat-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #52525b;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+/* ── FACT LIST (Chapters 2 & 3) ── */
+.hero-fact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hero-fact {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  color: #a1a1aa;
+  line-height: 1.5;
+  padding-left: 2px;
+}
+.hero-fact-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: #38bdf8;
+  letter-spacing: 0.12em;
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.18);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── SECURITY BADGE ROW (Chapter 4) ── */
+.hero-badge-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.hero-sec-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #71717a;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+}
+
+/* ── PROVIDER STRIP — full-width, pinned to bottom of sticky viewport ── */
+.hero-provider-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  padding: 24px 0 28px;
+  background: linear-gradient(to top, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.0) 100%);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+}
+.hero-provider-strip.strip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.hero-provider-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-align: center;
+  margin-bottom: 14px;
+}
+/* Override marquee width for full-width strip */
+.hero-provider-strip .provider-marquee {
+  max-width: none;
+  width: 100%;
+  height: 40px;
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+.hero-provider-strip .provider-marquee-track {
+  gap: 56px;
+  animation-duration: 35s;
+}
+.hero-provider-strip .provider-logo {
+  height: 32px;
+  max-width: 120px;
+  opacity: 0.45;
+}
+
 
 /* Bento Grid */
 .bento-sec { max-width: 1080px; margin: 0 auto 90px; padding: 0 24px; }
