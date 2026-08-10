@@ -10,10 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
-<!-- jsPDF — load in head so it's ready before any body script -->
+<!-- jsPDF CDN with alias & fallback -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  if (window.jspdf && window.jspdf.jsPDF) { window.jsPDF = window.jspdf.jsPDF; }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<!-- PDF export logic — runs synchronously before body module scripts -->
 <script src="./pdf-export.js"></script>
 </head>
 <body>
@@ -1677,8 +1679,14 @@ function openReportDD(e) {
   reportBtn?.setAttribute('aria-expanded', String(!isOpen));
 }
 reportBtn?.addEventListener('click', (e) => {
-  // Show the PDF options modal instead of dropdown when clicking main area
-  openReportDD(e);
+  e.stopPropagation();
+  if (e.target.closest('.chevron-down')) {
+    openReportDD(e);
+  } else {
+    reportDD?.classList.add('hidden');
+    reportWrap?.classList.remove('open');
+    document.getElementById('pdf-options-modal')?.classList.remove('hidden');
+  }
 });
 
 document.addEventListener('click', (e) => {

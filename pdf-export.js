@@ -897,7 +897,20 @@ window.exportVantagePDF = async function(options) {
     }
 
     var fn = 'Vantage_Billing_Packet_' + opts.period.replace(/\s+/g, '_') + '.pdf';
-    doc.save(fn);
+    try {
+      doc.save(fn);
+    } catch(saveErr) {
+      console.warn('[PDF] doc.save failed, triggering Blob download fallback:', saveErr);
+      var blob = doc.output('blob');
+      var blobUrl = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fn;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 10000);
+    }
     finishProgress();
     window.showToast && window.showToast('Downloaded \u2014 ' + fn, 'success');
 
