@@ -855,7 +855,36 @@ function finishProgress() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MAIN EXPORT ENTRY POINT
+   DYNAMIC LIBRARY LOADER — no CDN race condition
+═══════════════════════════════════════════════════════════ */
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    // Already loaded?
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve(); return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload  = resolve;
+    s.onerror = () => reject(new Error('Failed to load: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureJsPDF() {
+  const get = () => (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
+  if (get()) return get();
+
+  // Load from unpkg (reliable, always has latest versions)
+  await loadScript('https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js');
+  await loadScript('https://unpkg.com/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js');
+
+  if (!get()) throw new Error('jsPDF failed to register on window after CDN load');
+  return get();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN ENTRY POINT
 ═══════════════════════════════════════════════════════════ */
 window.exportVantagePDF = async function exportVantagePDF(options = {}) {
   const opts = {
@@ -864,13 +893,6 @@ window.exportVantagePDF = async function exportVantagePDF(options = {}) {
     sigName:         options.sigName         || '',
     includeAppendix: options.includeAppendix !== false,
   };
-
-  // Support both UMD exposure styles across CDN versions
-  const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if (!JsPDF) {
-    window.showToast?.('PDF library not loaded — please refresh (Ctrl+Shift+R) and retry.', 'error');
-    return;
-  }
 
   document.querySelectorAll('[data-pdf-trigger]').forEach(b => {
     b.disabled = true; b.setAttribute('aria-busy', 'true');
@@ -882,12 +904,13 @@ window.exportVantagePDF = async function exportVantagePDF(options = {}) {
   if (si) si.style.visibility = 'hidden';
   if (sc) sc.style.visibility = 'hidden';
 
-  await new Promise(r => setTimeout(r, 60));
-
   try {
-    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    // Load jsPDF + autotable on-demand — guaranteed ready before we use it
+    const JsPDF = await ensureJsPDF();
 
-    /* All 3 sheets — Portrait A4 */
+    await new Promise(r => setTimeout(r, 40));
+
+    /* All 3 sheets — Portrait A4 (210 × 297 mm) */
     const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     buildSheet1(doc, opts);
 
@@ -905,9 +928,9 @@ window.exportVantagePDF = async function exportVantagePDF(options = {}) {
     window.showToast?.(`Downloaded — ${fn}`, 'success');
 
   } catch (err) {
-    console.error('[PDF]', err);
+    console.error('[PDF Export Error]', err);
     finishProgress();
-    window.showToast?.('PDF generation failed. See console for details.', 'error');
+    window.showToast?.(`PDF error: ${err.message}`, 'error');
   } finally {
     if (si) si.style.visibility = '';
     if (sc) sc.style.visibility = '';
@@ -915,4 +938,4 @@ window.exportVantagePDF = async function exportVantagePDF(options = {}) {
       b.disabled = false; b.removeAttribute('aria-busy');
     });
   }
-}
+};
