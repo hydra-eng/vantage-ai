@@ -232,7 +232,7 @@
                 <span class="hac-label">UNAUTHORIZED TOOL</span>
                 <span class="hac-time">2m ago</span>
               </div>
-              <div class="hac-name">Rohan Chaudhary · Product Design</div>
+              <div class="hac-name">Employee #PD-04 &middot; Product Design</div>
               <div class="hac-desc">Using <strong>Sora</strong> — not on approved provider list. API key traced to personal account.</div>
             </div>
 
@@ -242,7 +242,7 @@
                 <span class="hac-label">SPEND SPIKE</span>
                 <span class="hac-time">14m ago</span>
               </div>
-              <div class="hac-name">Karthik Subramaniam · Engineering</div>
+              <div class="hac-name">Employee #EN-11 &middot; Engineering</div>
               <div class="hac-desc">Spend is <strong>+280%</strong> above 3-month average — GPT-4o batch job running without approval.</div>
             </div>
 
@@ -252,7 +252,7 @@
                 <span class="hac-label">ROGUE API KEY</span>
                 <span class="hac-time">1h ago</span>
               </div>
-              <div class="hac-name">Ananya Mehta · Marketing</div>
+              <div class="hac-name">Employee #MK-07 &middot; Marketing</div>
               <div class="hac-desc">New OpenAI key detected outside Vantage vault — auto-flagged for review.</div>
             </div>
           </div>
@@ -629,6 +629,33 @@
      ═══════════════════════════════════════════════════════════ -->
 <div id="app-shell" class="hidden">
 
+<!-- DASHBOARD TOP HEADER -->
+<header id="hdr">
+  <div class="hdr-brand">
+    <svg viewBox="0 0 32 32" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <defs>
+        <linearGradient id="vt-logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#0f62fe"/>
+          <stop offset="100%" stop-color="#38bdf8"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 6L16 28L28 6H21.5L16 18.5L10.5 6H4Z" fill="url(#vt-logo-grad)"/>
+      <path d="M12 6L16 14L20 6H25L16 22L7 6H12Z" fill="#ffffff" opacity="0.35"/>
+    </svg>
+    <span class="brand-name">Vantage</span>
+    <button class="sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">&#9776;</button>
+  </div>
+  <div class="hdr-ctx">AI Spend Control &middot; TechCorp India Pvt. Ltd.</div>
+  <div class="hdr-sync">Synced 3 min ago</div>
+  <button class="hdr-theme-toggle" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+    <span id="theme-toggle-icon">&#9790;</span> <span id="theme-toggle-lbl">Dark</span>
+  </button>
+  <div class="hdr-user">
+    <div class="u-av">IT</div>
+    <span>IT Admin</span>
+  </div>
+</header>
+
 <!-- SIDE NAV -->
 <nav id="nav" role="navigation" aria-label="Main navigation">
   <div class="nav-grp-lbl">Monitor</div>
@@ -691,7 +718,7 @@
         <div class="ov-spend-num">₹3,39,553</div>
         <div class="ov-spend-meta">
           <span class="ov-delta-up">↑ +14.0% vs June</span>
-          <span class="ov-delta-lbl">Driven by Video team ramp-up + Karthik Subramaniam cost spike</span>
+      <span class="ov-delta-lbl">Driven by Video team ramp-up and Engineering batch jobs</span>
         </div>
       </div>
       <div class="ov-hero-r">
@@ -706,7 +733,7 @@
       <span class="notif-icon notif-icon-error">◬</span>
       <div class="notif-bd">
         <div class="notif-title notif-title-error">2 anomalies require attention</div>
-        <div class="notif-desc">Rohan Chaudhary is using Sora (unauthorized tool, not on approved list) · Karthik Subramaniam's spend is +280% above 3-month average</div>
+        <div class="notif-desc">Unauthorized personal AI plan detected in Product team &middot; Engineering batch job spend +280% above 3-month average</div>
         <button class="notif-act" data-view="budgets">Review alerts →</button>
       </div>
       <button class="notif-close" aria-label="Dismiss">×</button>
