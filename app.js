@@ -802,3 +802,130 @@ renderProviders();
 renderIntProvGroups();
 renderBudgets();
 renderAlerts();
+
+// ============================================================
+// CANVAS 192-FRAME SCROLL SEQUENCE PLAYER
+// ============================================================
+function initCanvasSequence() {
+  const frameCount = 192;
+  const folderPath = 'public/hero-sequence';
+  const filePrefix = 'ezgif-frame-';
+  const fileExtension = '.jpg';
+  const images = new Array(frameCount);
+  let loadedCount = 0;
+  let currentFrame = 1;
+  let rafId = null;
+
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const preloader = document.getElementById('hero-preloader');
+  const preloaderText = document.getElementById('hero-preloader-text');
+  const preloaderFill = document.getElementById('hero-preloader-fill');
+  const track = document.getElementById('canvas-hero-track');
+  const contentWrapper = document.getElementById('hero-content-wrapper');
+
+  function pad(num, size) {
+    let s = num + '';
+    while (s.length < size) s = '0' + s;
+    return s;
+  }
+
+  function drawFrame(frameIdx) {
+    if (!canvas || !ctx) return;
+    const img = images[frameIdx - 1];
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+    }
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    const imgWidth = img.naturalWidth;
+    const imgHeight = img.naturalHeight;
+    const imgAspect = imgWidth / imgHeight;
+    const canvasAspect = displayWidth / displayHeight;
+
+    let renderWidth = displayWidth;
+    let renderHeight = displayHeight;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (canvasAspect > imgAspect) {
+      renderHeight = displayWidth / imgAspect;
+      offsetY = (displayHeight - renderHeight) / 2;
+    } else {
+      renderWidth = displayHeight * imgAspect;
+      offsetX = (displayWidth - renderWidth) / 2;
+    }
+
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+    ctx.restore();
+  }
+
+  function handleScroll() {
+    if (!track) return;
+    const rect = track.getBoundingClientRect();
+    const totalScrollable = rect.height - window.innerHeight;
+    if (totalScrollable <= 0) return;
+
+    const scrollY = -rect.top;
+    const fraction = Math.min(Math.max(scrollY / totalScrollable, 0), 1);
+
+    const targetFrame = Math.min(
+      Math.max(Math.floor(fraction * (frameCount - 1)) + 1, 1),
+      frameCount
+    );
+
+    if (targetFrame !== currentFrame) {
+      currentFrame = targetFrame;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => drawFrame(targetFrame));
+    }
+
+    if (contentWrapper) {
+      const opacity = Math.max(1 - fraction * 1.8, 0);
+      const translateY = fraction * -80;
+      contentWrapper.style.opacity = opacity;
+      contentWrapper.style.transform = `translateY(${translateY}px)`;
+    }
+  }
+
+  // Preload frames
+  for (let i = 1; i <= frameCount; i++) {
+    const img = new Image();
+    const fn = `${filePrefix}${pad(i, 3)}${fileExtension}`;
+    img.src = `${folderPath}/${fn}`;
+
+    img.onload = img.onerror = () => {
+      loadedCount++;
+      const pct = Math.floor((loadedCount / frameCount) * 100);
+      if (preloaderText) preloaderText.textContent = `INITIALIZING TELEMETRY... [${pct}%]`;
+      if (preloaderFill) preloaderFill.style.width = `${pct}%`;
+
+      if (loadedCount === frameCount) {
+        if (preloader) {
+          preloader.style.opacity = '0';
+          setTimeout(() => { preloader.style.display = 'none'; }, 300);
+        }
+        drawFrame(currentFrame);
+      }
+    };
+
+    images[i - 1] = img;
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', handleScroll, { passive: true });
+  handleScroll();
+}
+
+initCanvasSequence();
