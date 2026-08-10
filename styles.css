@@ -934,7 +934,121 @@ select.ff-in option{background:var(--surface)}
 }
 
 
+
+/* ══════════════════════════════════════════════════════════
+   PROVIDER LOGO MARQUEE SECTION — standalone, always visible
+   ══════════════════════════════════════════════════════════ */
+
+.providers-section {
+  background: #0a0a0c;
+  padding: 72px 0 80px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.providers-heading {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #3f3f46;
+  margin-bottom: 40px;
+}
+
+/* Each row is a masked overflow container */
+.providers-row-wrap {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  /* Edge fade so cards appear/disappear gracefully */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+}
+
+/* The scrolling track — width max-content fits all cards */
+.providers-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  align-items: center;
+}
+.providers-track.rtl {
+  animation: track-rtl 36s linear infinite;
+}
+.providers-track.ltr {
+  animation: track-ltr 42s linear infinite;
+}
+/* Pause both rows on hover for premium feel */
+.providers-row-wrap:hover .providers-track {
+  animation-play-state: paused;
+}
+
+/* Individual provider card */
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 20px 28px;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  cursor: default;
+}
+.provider-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* The logo image inside each card */
+.pcard-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 12px;
+  /* Slight saturation and brightness boost — raw logos look better than inverted here */
+  filter: saturate(0.9) brightness(1.0);
+  display: block;
+}
+
+/* Provider name label */
+.pcard-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: #52525b;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Keyframes */
+@keyframes track-rtl {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes track-ltr {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
 /* Bento Grid */
+
 .bento-sec { max-width: 1080px; margin: 0 auto 90px; padding: 0 24px; }
 .bento-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
