@@ -169,12 +169,57 @@ window.VantageProviderSync = (function() {
     return summary;
   }
 
+  /**
+   * Send prompt through secure Backend Proxy Cloud Function (/api/aiProxy)
+   * Server performs budget check, LLM execution, token logging & Firestore telemetry write.
+   */
+  async function callBackendProxy({ prompt, provider = 'openai', model = 'gpt-4o', employeeId = 'EMP-EN-001', workspaceId = 'default' }) {
+    const key = getSecret(provider.toLowerCase()) || getSecret('openai');
+    const response = await fetch('/api/aiProxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({ prompt, provider, model, employeeId, workspaceId })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || `Proxy error (HTTP ${response.status})`);
+    }
+
+    // Append new live telemetry record to client state
+    if (data.usage && window.TELEMETRY_DATA) {
+      window.TELEMETRY_DATA.unshift({
+        ts: new Date().toISOString().replace('T', ' ').slice(0, 16),
+        eid: employeeId,
+        team: 'Engineering',
+        provider: provider.toUpperCase(),
+        model: model,
+        prompt: data.usage.prompt_tokens,
+        completion: data.usage.completion_tokens,
+        cost: data.usage.cost_inr,
+        policy: data.policyStatus || 'Normal',
+        loop: false,
+        confidenceTier: 'live',
+        syncedAt: data.syncedAt
+      });
+      if (typeof window.renderTelemTable === 'function') {
+        window.renderTelemTable(window.TELEMETRY_DATA);
+      }
+    }
+
+    return data;
+  }
+
   return {
     setSecret,
     getSecret,
     syncOpenAI,
     syncAnthropic,
     syncGitHub,
-    syncAll
+    syncAll,
+    callBackendProxy
   };
 })();

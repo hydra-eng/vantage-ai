@@ -1438,7 +1438,23 @@ function unloadSpline() {
   }
 }
 
-// Pause WebGL rendering when tab is backgrounded
+// Pause WebGL rendering when tab is backgrounded or window is blurred
+window.addEventListener('blur', () => {
+  if (splineIframe && splineIframe.src) {
+    splineIframe._suspendedSrc = splineIframe.src;
+    splineIframe.setAttribute('src', '');
+  }
+});
+
+window.addEventListener('focus', () => {
+  if (splineIframe && splineIframe._suspendedSrc && !document.hidden) {
+    const loginView = document.getElementById('login-view');
+    if (loginView && !loginView.classList.contains('hidden')) {
+      splineIframe.setAttribute('src', splineIframe._suspendedSrc);
+    }
+  }
+});
+
 document.addEventListener('visibilitychange', () => {
   if (!splineIframe) return;
   if (document.hidden) {

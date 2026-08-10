@@ -1,4 +1,11 @@
 {
+  "functions": {
+    "source": "functions",
+    "codebase": "default"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "site": "vantage-ai-app",
     "public": ".",
@@ -25,6 +32,10 @@
       }
     ],
     "rewrites": [
+      {
+        "source": "/api/aiProxy",
+        "function": "aiProxy"
+      },
       {
         "source": "**",
         "destination": "/index.html"
