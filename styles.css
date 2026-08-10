@@ -528,10 +528,10 @@ select.ff-in option{background:var(--surface)}
    CANVAS SCROLL HERO — 4-CHAPTER APPLE-STYLE PARALLAX
    ════════════════════════════════════════════════════════════ */
 
-/* 750vh gives each of the 5 chapters ~150vh of scroll room */
+/* 1000vh gives each of the 7 chapters ~143vh of scroll room */
 .hero-scroll-container {
   position: relative;
-  height: 750vh;
+  height: 1000vh;
   background: #0a0a0c;
 }
 
@@ -1235,3 +1235,216 @@ select.ff-in option{background:var(--surface)}
 /* Sidebar toggle visible on narrow screens only */
 .sidebar-toggle-btn { display: none; background: none; border: none; color: var(--t-inv); font-size: 16px; cursor: pointer; padding: 4px 8px; }
 @media(max-width:1024px) { .sidebar-toggle-btn { display: inline-flex; } }
+
+/* ══════════════════════════════════════════════════════════════
+   INTEGRATION CHIPS (Chapter 6)
+   ══════════════════════════════════════════════════════════════ */
+.hero-integration-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  max-width: 500px;
+}
+.hi-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #a1a1aa;
+  transition: background 0.2s, border-color 0.2s;
+}
+.hi-chip:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+.hi-ico { width: 18px; height: 18px; object-fit: contain; border-radius: 4px; }
+.hi-chip-more {
+  background: rgba(56,189,248,0.06);
+  border-color: rgba(56,189,248,0.2);
+  color: #38bdf8;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LANDING SECTION BASE (Features / Security / FAQ)
+   ══════════════════════════════════════════════════════════════ */
+.landing-section {
+  background: #09090b;
+  padding: 100px 0 110px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.ls-dark {
+  background: #050507;
+}
+.ls-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.ls-inner-narrow {
+  max-width: 780px;
+}
+.ls-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 20px;
+}
+.ls-title {
+  font-size: clamp(32px, 4.5vw, 54px);
+  font-weight: 700;
+  color: #fafafa;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+.ls-sub {
+  font-size: 17px;
+  color: #71717a;
+  max-width: 580px;
+  line-height: 1.7;
+  margin-bottom: 64px;
+}
+
+/* ── FEATURE CARDS GRID ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+.feat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.feat-card:hover {
+  background: rgba(255,255,255,0.055);
+  border-color: rgba(255,255,255,0.13);
+  transform: translateY(-3px);
+}
+.feat-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+.feat-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin-bottom: 10px;
+}
+.feat-desc {
+  font-size: 13.5px;
+  color: #71717a;
+  line-height: 1.65;
+}
+
+/* ── SECURITY PILLARS ── */
+.security-pillars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  margin-bottom: 48px;
+}
+@media (max-width: 700px) { .security-pillars { grid-template-columns: 1fr; } }
+.sec-pillar {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 36px 32px;
+  transition: background 0.2s;
+}
+.sec-pillar:hover { background: rgba(255,255,255,0.04); }
+.sec-pillar-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #38bdf8;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.sec-pillar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin-bottom: 12px;
+}
+.sec-pillar-desc {
+  font-size: 14px;
+  color: #71717a;
+  line-height: 1.7;
+}
+.sec-badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.sec-b {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #52525b;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+}
+
+/* ── FAQ ACCORDION ── */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.faq-item {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.faq-item[open] {
+  border-color: rgba(56,189,248,0.25);
+}
+.faq-q {
+  list-style: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #d4d4d8;
+  padding: 20px 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  transition: color 0.2s;
+}
+.faq-q:hover { color: #fafafa; }
+.faq-q::after {
+  content: '+';
+  font-size: 20px;
+  color: #52525b;
+  font-weight: 300;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.faq-item[open] .faq-q::after {
+  transform: rotate(45deg);
+  color: #38bdf8;
+}
+.faq-a {
+  font-size: 14px;
+  color: #71717a;
+  line-height: 1.75;
+  padding: 0 24px 20px;
+}
+

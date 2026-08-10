@@ -877,14 +877,16 @@ document.addEventListener('click', (e) => {
   let lastDrawn    = -1;
   let lastChapter  = -1;
 
-  // ── Chapter config — 5 chapters, 192 frames split evenly ──
-  // ~38 frames each → smooth transitions, enough canvas motion per chapter
+  // ── Chapter config — 7 chapters, 192 frames evenly split ──
+  // ~27 frames each → fast canvas motion, chapter switch at correct scroll point
   const chapters = [
-    { el: document.getElementById('hero-ch-1'), start: 0,   end: 37  },
-    { el: document.getElementById('hero-ch-2'), start: 38,  end: 75  },
-    { el: document.getElementById('hero-ch-3'), start: 76,  end: 114 },
-    { el: document.getElementById('hero-ch-4'), start: 115, end: 152 },
-    { el: document.getElementById('hero-ch-5'), start: 153, end: 191 },
+    { el: document.getElementById('hero-ch-1'), start: 0,   end: 26  },
+    { el: document.getElementById('hero-ch-2'), start: 27,  end: 53  },
+    { el: document.getElementById('hero-ch-3'), start: 54,  end: 81  },
+    { el: document.getElementById('hero-ch-4'), start: 82,  end: 109 },
+    { el: document.getElementById('hero-ch-5'), start: 110, end: 137 },
+    { el: document.getElementById('hero-ch-6'), start: 138, end: 164 },
+    { el: document.getElementById('hero-ch-7'), start: 165, end: 191 },
   ];
   const providerStrip = document.getElementById('hero-provider-strip');
 
