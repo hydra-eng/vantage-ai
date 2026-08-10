@@ -812,7 +812,6 @@ document.addEventListener('click', (e) => {
 
   const frames = [];
   let loadedCount = 0;
-  let currentFrameIndex = 0;
   let animationFrameId = null;
 
   function pad(num, size) {
@@ -825,8 +824,8 @@ document.addEventListener('click', (e) => {
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
     const img = new Image();
     const frameNum = pad(i, 3);
-    const primarySrc = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
-    const fallbackSrc = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+    const primarySrc = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+    const fallbackSrc = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
 
     img.src = primarySrc;
     img.onload = () => {
@@ -847,7 +846,7 @@ document.addEventListener('click', (e) => {
       }
     };
     img.onerror = () => {
-      if (img.src.includes('public/')) {
+      if (img.src.includes('images sequence -jpg/') && !img.src.includes('public/')) {
         img.src = fallbackSrc;
       } else {
         loadedCount++;
@@ -886,7 +885,63 @@ document.addEventListener('click', (e) => {
     ctx.restore();
   }
 
-  // Scroll listener & threshold mapping
+  let targetFrameIndex = 0;
+  let currentFrameIndex = 0;
+  let lastRenderedFrame = -1;
+
+  // Apply parallax translation to text & layout cards
+  function applyParallax(frameIdx) {
+    if (stage1) {
+      const p1 = Math.max(0, Math.min(1, frameIdx / 48));
+      const y1 = p1 * -100;
+      const op1 = Math.max(0, 1 - (frameIdx - 35) / 15);
+      stage1.style.transform = `translate3d(0, ${y1}px, 0)`;
+      stage1.style.opacity = frameIdx > 48 ? '0' : String(op1);
+    }
+    if (stage2) {
+      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 45) / 60));
+      const y2 = (1 - stageProgress) * 70 - stageProgress * 70;
+      stage2.style.transform = `translate3d(0, ${y2}px, 0)`;
+    }
+    if (stage3) {
+      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 105) / 50));
+      const y3 = (1 - stageProgress) * 70 - stageProgress * 70;
+      stage3.style.transform = `translate3d(0, ${y3}px, 0)`;
+    }
+    if (stage4) {
+      const stageProgress = Math.max(0, Math.min(1, (frameIdx - 155) / 36));
+      const y4 = (1 - stageProgress) * 70;
+      stage4.style.transform = `translate3d(0, ${y4}px, 0)`;
+    }
+  }
+
+  // Smooth Lerp Scrubbing Loop
+  function tickLoop() {
+    if (Math.abs(targetFrameIndex - currentFrameIndex) > 0.01) {
+      currentFrameIndex += (targetFrameIndex - currentFrameIndex) * 0.22;
+      const roundedFrame = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.floor(currentFrameIndex)));
+      
+      if (roundedFrame !== lastRenderedFrame) {
+        lastRenderedFrame = roundedFrame;
+        renderFrame(roundedFrame);
+        if (frameTextEl) {
+          frameTextEl.textContent = `FRAME ${pad(roundedFrame + 1, 3)} / 192 • TELEMETRY ENGINE`;
+        }
+      }
+
+      // Stage active state toggling
+      if (stage1) stage1.classList.toggle('stage-active', roundedFrame <= 48);
+      if (stage2) stage2.classList.toggle('stage-active', roundedFrame > 48 && roundedFrame <= 105);
+      if (stage3) stage3.classList.toggle('stage-active', roundedFrame > 105 && roundedFrame <= 155);
+      if (stage4) stage4.classList.toggle('stage-active', roundedFrame > 155);
+
+      applyParallax(currentFrameIndex);
+    }
+    requestAnimationFrame(tickLoop);
+  }
+  requestAnimationFrame(tickLoop);
+
+  // Scroll listener & threshold calculation
   function updateScroll() {
     if (!container) return;
     const rect = container.getBoundingClientRect();
@@ -894,38 +949,29 @@ document.addEventListener('click', (e) => {
     
     if (scrollableDistance <= 0) return;
 
-    // Calculate progress 0 to 1
+    // Calculate progress 0 to 1 relative to viewport container
     const rawProgress = (-rect.top) / scrollableDistance;
     const progress = Math.max(0, Math.min(1, rawProgress));
 
-    const targetFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
-    
-    if (targetFrame !== currentFrameIndex) {
-      currentFrameIndex = targetFrame;
-      renderFrame(currentFrameIndex);
-      if (frameTextEl) {
-        frameTextEl.textContent = `FRAME ${pad(currentFrameIndex + 1, 3)} / 192 • TELEMETRY ENGINE`;
-      }
-    }
-
-    // Stage threshold transitions (0-191 total frames)
-    if (stage1) stage1.classList.toggle('stage-active', currentFrameIndex <= 50);
-    if (stage2) stage2.classList.toggle('stage-active', currentFrameIndex > 50 && currentFrameIndex <= 110);
-    if (stage3) stage3.classList.toggle('stage-active', currentFrameIndex > 110 && currentFrameIndex <= 160);
-    if (stage4) stage4.classList.toggle('stage-active', currentFrameIndex > 160);
+    targetFrameIndex = Math.min(TOTAL_FRAMES - 1, progress * (TOTAL_FRAMES - 1));
   }
 
   function onScroll() {
-    if (!animationFrameId) {
-      animationFrameId = requestAnimationFrame(() => {
-        updateScroll();
-        animationFrameId = null;
-      });
-    }
+    updateScroll();
   }
 
+  // Bind scroll listeners to window, document, AND fixed landing-page container (#login-view)
+  const loginView = document.getElementById('login-view');
+  if (loginView) {
+    loginView.addEventListener('scroll', onScroll, { passive: true });
+  }
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', () => renderFrame(currentFrameIndex), { passive: true });
+  document.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => {
+    updateScroll();
+    renderFrame(Math.floor(currentFrameIndex));
+  }, { passive: true });
+  
   updateScroll();
 })();
 

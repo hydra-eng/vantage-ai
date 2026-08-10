@@ -628,7 +628,7 @@ select.ff-in option{background:var(--surface)}
   text-transform: uppercase;
 }
 
-/* Multi-stage Text Overlay Base */
+/* Multi-stage Text Overlay Base & Parallax Motion */
 .hero-stage {
   position: absolute;
   inset: 0;
@@ -638,16 +638,23 @@ select.ff-in option{background:var(--surface)}
   justify-content: center;
   align-items: flex-start;
   padding: 0 80px;
-  max-width: 800px;
+  max-width: 840px;
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translate3d(0, 40px, 0);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .hero-stage.stage-active {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
   pointer-events: auto;
+}
+
+/* Dynamic Parallax Items */
+.parallax-item {
+  will-change: transform, opacity;
+  transition: transform 0.15s ease-out, opacity 0.2s ease-out;
 }
 
 .hero-stage .hero-title {
@@ -658,8 +665,8 @@ select.ff-in option{background:var(--surface)}
 }
 .hero-stage .hero-subtitle {
   text-align: left;
-  margin: 0 0 32px;
-  max-width: 540px;
+  margin: 0 0 28px;
+  max-width: 580px;
   color: #e4e4e7;
   font-size: 16px;
   font-weight: 450;
@@ -673,31 +680,47 @@ select.ff-in option{background:var(--surface)}
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   width: 100%;
-  max-width: 720px;
-  margin-top: 12px;
+  max-width: 760px;
+  margin-top: 16px;
 }
 .hero-detail-card {
-  background: rgba(18, 18, 21, 0.85);
+  background: rgba(18, 18, 21, 0.88);
   border: 1px solid rgba(255,255,255,0.12);
-  padding: 16px 18px;
+  padding: 18px 20px;
   border-radius: 4px;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.hero-detail-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(24, 24, 28, 0.95);
+  transform: translateY(-2px);
 }
 .hdc-icon {
-  font-size: 16px;
+  font-size: 18px;
   margin-bottom: 8px;
   display: block;
 }
 .hdc-title {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #f4f4f5;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .hdc-desc {
   font-size: 12px;
   color: #a1a1aa;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+.hdc-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 6px;
+  margin-top: 8px;
+  border-radius: 2px;
 }
 
 /* Pulsing live frame counter badge */
