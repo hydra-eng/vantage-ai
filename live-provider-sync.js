@@ -161,10 +161,6 @@ window.VantageProviderSync = (function() {
 
     // Store sync state in window object for telemetry & UI access
     window.LIVE_SYNC_SUMMARY = summary;
-    if (window.showToast) {
-      const liveCount = [summary.openai, summary.anthropic, summary.github].filter(s => s.status === 'live').length;
-      window.showToast(`Live Provider Sync Complete: ${liveCount} provider(s) active`, liveCount > 0 ? 'success' : 'warning');
-    }
 
     return summary;
   }
