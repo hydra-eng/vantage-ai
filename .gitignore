@@ -1,3 +1,12 @@
+# Secrets & Environment variables
+.env
+.env.*
+.env.local
+secrets/
+*.pem
+*.key
+*.secret
+
 # Ignore unnecessary local files
 antigravity-dashboard-prompt.md
 data/
@@ -6,3 +15,4 @@ firebase.json
 **/node_modules/**
 public/images sequence -jpg/
 images sequence -jpg/
+

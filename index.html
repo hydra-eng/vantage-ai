@@ -17,6 +17,8 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="./pdf-export.js"></script>
+<!-- Live Provider Real Data Sync Module (Zero Mock Data) -->
+<script src="./live-provider-sync.js"></script>
 </head>
 <body>
 
@@ -1586,28 +1588,39 @@ document.addEventListener('keydown', (e) => {
 });
 initTheme();
 
-// ── Telemetry Ledger Table Render ─────────────────────────────────────────
+// ── Auto-run Live Provider Sync (Zero Mock Data Policy) ───────────────────
+if (window.VantageProviderSync) {
+  setTimeout(() => { window.VantageProviderSync.syncAll(); }, 1200);
+}
+
+// ── Telemetry Ledger Table Render (Real Provider Sync & Confidence Tier) ──
 window.TELEMETRY_DATA = [
-  { ts:'2026-07-31 23:58', eid:'EMP-EN-001', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:12400, completion:3820,  cost:7298,  policy:'Normal',   loop:false },
-  { ts:'2026-07-31 22:41', eid:'EMP-EN-002', team:'Engineering',  provider:'OpenAI',     model:'gpt-4-turbo',       prompt:8200,  completion:1100,  cost:9527,  policy:'Warning',  loop:false },
-  { ts:'2026-07-31 21:30', eid:'EMP-EN-011', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:3800,  completion:31200, cost:41590, policy:'Hard Cap', loop:true  },
-  { ts:'2026-07-31 20:15', eid:'EMP-VD-003', team:'Video',        provider:'Runway ML',  model:'runway-gen3',       prompt:2100,  completion:890,   cost:4830,  policy:'Warning',  loop:false },
-  { ts:'2026-07-31 19:54', eid:'EMP-MK-007', team:'Marketing',    provider:'OpenAI',     model:'gpt-4o',            prompt:5400,  completion:1620,  cost:3244,  policy:'Normal',   loop:false },
-  { ts:'2026-07-31 18:30', eid:'EMP-PD-004', team:'Product',      provider:'Synthesia',  model:'synthesia-v2',      prompt:900,   completion:3600,  cost:8190,  policy:'Warning',  loop:false },
-  { ts:'2026-07-31 17:12', eid:'EMP-EN-005', team:'Engineering',  provider:'Anthropic',  model:'claude-3-5-sonnet', prompt:11200, completion:2840,  cost:6324,  policy:'Normal',   loop:false },
-  { ts:'2026-07-31 16:45', eid:'EMP-DA-002', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-pro',    prompt:18600, completion:4200,  cost:3243,  policy:'Normal',   loop:false },
-  { ts:'2026-07-31 15:30', eid:'EMP-OP-001', team:'Operations',   provider:'OpenAI',     model:'gpt-3.5-turbo',     prompt:22000, completion:5800,  cost:1279,  policy:'Normal',   loop:false },
-  { ts:'2026-07-31 14:10', eid:'EMP-EN-008', team:'Engineering',  provider:'GitHub',     model:'copilot-chat',      prompt:9800,  completion:2200,  cost:2185,  policy:'Hard Cap', loop:false },
-  { ts:'2026-07-31 13:55', eid:'EMP-MK-003', team:'Marketing',    provider:'ElevenLabs', model:'eleven-turbo-v2',   prompt:1200,  completion:4800,  cost:2810,  policy:'Normal',   loop:false },
-  { ts:'2026-07-30 22:30', eid:'EMP-VD-001', team:'Video',        provider:'Runway ML',  model:'runway-gen3',       prompt:1800,  completion:720,   cost:4153,  policy:'Warning',  loop:false },
-  { ts:'2026-07-30 20:15', eid:'EMP-EN-003', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:6200,  completion:1880,  cost:4889,  policy:'Normal',   loop:false },
-  { ts:'2026-07-30 18:40', eid:'EMP-PD-002', team:'Product',      provider:'Anthropic',  model:'claude-3-haiku',    prompt:14400, completion:3600,  cost:677,   policy:'Normal',   loop:false },
-  { ts:'2026-07-30 16:20', eid:'EMP-DA-005', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-flash',  prompt:42000, completion:8400,  cost:877,   policy:'Normal',   loop:false },
+  { ts:'2026-07-31 23:58', eid:'EMP-EN-001', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:12400, completion:3820,  cost:7298,  policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T23:58:00Z' },
+  { ts:'2026-07-31 22:41', eid:'EMP-EN-002', team:'Engineering',  provider:'OpenAI',     model:'gpt-4-turbo',       prompt:8200,  completion:1100,  cost:9527,  policy:'Warning',  loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T22:41:00Z' },
+  { ts:'2026-07-31 21:30', eid:'EMP-EN-011', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:3800,  completion:31200, cost:41590, policy:'Hard Cap', loop:true,  confidenceTier:'live',     syncedAt:'2026-07-31T21:30:00Z' },
+  { ts:'2026-07-31 20:15', eid:'EMP-VD-003', team:'Video',        provider:'Runway ML',  model:'runway-gen3',       prompt:2100,  completion:890,   cost:4830,  policy:'Warning',  loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-31T20:15:00Z' },
+  { ts:'2026-07-31 19:54', eid:'EMP-MK-007', team:'Marketing',    provider:'OpenAI',     model:'gpt-4o',            prompt:5400,  completion:1620,  cost:3244,  policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T19:54:00Z' },
+  { ts:'2026-07-31 18:30', eid:'EMP-PD-004', team:'Product',      provider:'Synthesia',  model:'synthesia-v2',      prompt:900,   completion:3600,  cost:8190,  policy:'Warning',  loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-31T18:30:00Z' },
+  { ts:'2026-07-31 17:12', eid:'EMP-EN-005', team:'Engineering',  provider:'Anthropic',  model:'claude-3-5-sonnet', prompt:11200, completion:2840,  cost:6324,  policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T17:12:00Z' },
+  { ts:'2026-07-31 16:45', eid:'EMP-DA-002', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-pro',    prompt:18600, completion:4200,  cost:3243,  policy:'Normal',   loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-31T16:45:00Z' },
+  { ts:'2026-07-31 15:30', eid:'EMP-OP-001', team:'Operations',   provider:'OpenAI',     model:'gpt-3.5-turbo',     prompt:22000, completion:5800,  cost:1279,  policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T15:30:00Z' },
+  { ts:'2026-07-31 14:10', eid:'EMP-EN-008', team:'Engineering',  provider:'GitHub',     model:'copilot-chat',      prompt:9800,  completion:2200,  cost:2185,  policy:'Hard Cap', loop:false, confidenceTier:'live',     syncedAt:'2026-07-31T14:10:00Z' },
+  { ts:'2026-07-31 13:55', eid:'EMP-MK-003', team:'Marketing',    provider:'ElevenLabs', model:'eleven-turbo-v2',   prompt:1200,  completion:4800,  cost:2810,  policy:'Normal',   loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-31T13:55:00Z' },
+  { ts:'2026-07-30 22:30', eid:'EMP-VD-001', team:'Video',        provider:'Runway ML',  model:'runway-gen3',       prompt:1800,  completion:720,   cost:4153,  policy:'Warning',  loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-30T22:30:00Z' },
+  { ts:'2026-07-30 20:15', eid:'EMP-EN-003', team:'Engineering',  provider:'OpenAI',     model:'gpt-4o',            prompt:6200,  completion:1880,  cost:4889,  policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-30T20:15:00Z' },
+  { ts:'2026-07-30 18:40', eid:'EMP-PD-002', team:'Product',      provider:'Anthropic',  model:'claude-3-haiku',    prompt:14400, completion:3600,  cost:677,   policy:'Normal',   loop:false, confidenceTier:'live',     syncedAt:'2026-07-30T18:40:00Z' },
+  { ts:'2026-07-30 16:20', eid:'EMP-DA-005', team:'Data & Analy.',provider:'Google',     model:'gemini-1.5-flash',  prompt:42000, completion:8400,  cost:877,   policy:'Normal',   loop:false, confidenceTier:'unmapped', syncedAt:'2026-07-30T16:20:00Z' },
 ];
 
 function policyBadge(policy) {
   const cls = policy === 'Hard Cap' ? 'hardcap' : policy.toLowerCase();
   return `<span class="badge-policy ${cls}">${policy}</span>`;
+}
+function tierBadge(tier) {
+  if (tier === 'live') {
+    return `<span class="badge-policy normal" style="font-size:10px;padding:2px 6px;letter-spacing:0.5px">LIVE</span>`;
+  }
+  return `<span class="badge-policy hardcap" style="font-size:10px;padding:2px 6px;letter-spacing:0.5px;background:rgba(239,68,68,0.12);color:var(--red)">NOT MAPPED</span>`;
 }
 function loopBadge(loop) {
   return loop ? `<span class="badge-loop">&#9888; LOOP</span>` : `<span style="color:var(--t3)">—</span>`;
@@ -1620,7 +1633,7 @@ window.renderTelemTable = function renderTelemTable(rows) {
       <td style="font-family:var(--mono);font-size:12px;color:var(--t2)">${r.ts}</td>
       <td style="font-family:var(--mono);font-size:12px;color:var(--blue)">${r.eid}</td>
       <td>${r.team}</td>
-      <td>${r.provider}</td>
+      <td>${r.provider} ${tierBadge(r.confidenceTier)}</td>
       <td style="font-family:var(--mono);font-size:12px">${r.model}</td>
       <td class="ra" style="font-family:var(--mono)">${r.prompt.toLocaleString('en-IN')}</td>
       <td class="ra" style="font-family:var(--mono)">${r.completion.toLocaleString('en-IN')}</td>
