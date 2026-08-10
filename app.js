@@ -113,7 +113,12 @@ function navigate(id){
   if(n){n.classList.add('active');n.setAttribute('aria-current','page');}
   activeView=id;
   closeSidePanel();
+  // Trigger view-specific init hooks
+  if(id==='telemetry' && typeof window.renderTelemTable === 'function'){
+    window.renderTelemTable(window.TELEMETRY_DATA || []);
+  }
 }
+window.navigate = navigate; // expose so inline scripts can call it
 document.querySelectorAll('[data-view]').forEach(el=>{
   el.addEventListener('click',e=>{e.stopPropagation();navigate(el.dataset.view);});
 });
