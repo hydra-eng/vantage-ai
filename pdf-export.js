@@ -32,36 +32,37 @@ const DDATE = '15 August 2026';
    hairline #E5E7EB borders — prints well on laser/inkjet.
 ═══════════════════════════════════════════════════════════ */
 const P = {
-  /* Page structure */
-  headerBg:  [22,  44,  90],   // Deep corporate navy — header band
-  headerSub: [38,  65,  120],  // Slightly lighter for sub-bands
-  accent:    [37,  99,  235],  // Brand blue — accent lines & links
+  /* Page structure — Executive Onyx Charcoal & Forest Emerald (Non-Blue) */
+  headerBg:  [24,  28,  36],   // Deep Obsidian Charcoal (#181C24)
+  headerSub: [48,  56,  68],   // Slate Charcoal
+  accent:    [16,  98,  67],   // Deep Forest Emerald Green (#106243)
+  accentGold:[180, 130, 20],   // Warm Executive Gold (#B48214)
   white:     [255, 255, 255],
   black:     [10,  12,  18],
 
   /* Typography */
-  ink:       [17,  24,  39],   // Near-black body text
-  subtext:   [75,  85,  99],   // Secondary / label text
-  caption:   [107, 114, 128],  // Fine print
+  ink:       [17,  24,  39],   // Deep Ink (#111827)
+  subtext:   [75,  85,  99],   // Neutral Muted (#4B5563)
+  caption:   [107, 114, 128],  // Fine print (#6B7280)
 
   /* Table */
-  thBg:      [42,  69,  130],  // Table column header fill
+  thBg:      [34,  40,  50],   // Dark Onyx Charcoal table header
   thText:    [255, 255, 255],
-  rowAlt:    [248, 250, 253],  // Very light blue-grey for even rows
-  rowHover:  [239, 246, 255],
-  border:    [214, 220, 231],  // Hairline cell border
-  sectionBg: [237, 242, 252],  // Section header strip
+  rowAlt:    [247, 249, 248],  // Light Slate Tint
+  rowHover:  [240, 245, 242],
+  border:    [215, 222, 226],  // Hairline neutral border
+  sectionBg: [235, 242, 238],  // Soft Mint Slate section header
 
   /* Status badges */
-  green:     [21,  128, 61],
-  greenBg:   [220, 252, 231],
-  amber:     [161, 98,  7],
+  green:     [16,  98,  67],
+  greenBg:   [222, 247, 236],
+  amber:     [180, 100, 10],
   amberBg:   [254, 243, 199],
   red:       [185, 28,  28],
   redBg:     [254, 226, 226],
 
   /* Footer */
-  footerBg:  [30,  58,  138],
+  footerBg:  [24,  28,  36],
 };
 
 const GST = 0.18;
@@ -158,12 +159,12 @@ function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
   // Subtitle
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  doc.setTextColor(180, 198, 235);
+  doc.setTextColor(200, 210, 225);
   doc.text(subtitle, ML + 4, 18.5);
 
   // Right meta
   doc.setFontSize(6.5);
-  doc.setTextColor(180, 198, 235);
+  doc.setTextColor(200, 210, 225);
   doc.text(`Invoice: ${INV}`, W - MR, 9, { align: 'right' });
   doc.text(`Period: ${opts.period}   |   Entity: ${opts.workspace}`, W - MR, 14.5, { align: 'right' });
   doc.text(pgLabel, W - MR, 20, { align: 'right' });
@@ -338,8 +339,8 @@ function buildSheet1(doc, opts) {
 
   const kpis = [
     { lbl:'TAXABLE VALUE',  val: inrL(totalNet),    note:'Excl. GST',            clr: P.headerBg },
-    { lbl:'CGST (9%)',      val: inrL(totalCGST),   note:'Central Tax',          clr: [42, 69, 130] },
-    { lbl:'SGST (9%)',      val: inrL(totalSGST),   note:'State Tax',            clr: [42, 69, 130] },
+    { lbl:'CGST (9%)',      val: inrL(totalCGST),   note:'Central Tax',          clr: P.headerSub },
+    { lbl:'SGST (9%)',      val: inrL(totalSGST),   note:'State Tax',            clr: P.headerSub },
     { lbl:'TOTAL PAYABLE',  val: inrL(totalGross),  note:'Incl. GST',            clr: P.accent },
     { lbl:'BUDGET HEALTH',  val: budgPct + '%',     note: pLabel(budgPct),       clr: pColor(budgPct) },
   ];
