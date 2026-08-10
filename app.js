@@ -791,6 +791,145 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================================
+// CANVAS SCROLL HERO ENGINE (192 FRAMES SEQUENCE)
+// ============================================================
+(function initCanvasHeroEngine() {
+  const TOTAL_FRAMES = 192;
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const loaderEl = document.getElementById('hero-loader');
+  const loaderFill = document.getElementById('hero-loader-fill');
+  const loaderText = document.getElementById('hero-loader-text');
+  const frameTextEl = document.getElementById('hero-frame-text');
+  const container = document.getElementById('hero-scroll-sec');
+
+  const stage1 = document.getElementById('hero-stage-1');
+  const stage2 = document.getElementById('hero-stage-2');
+  const stage3 = document.getElementById('hero-stage-3');
+  const stage4 = document.getElementById('hero-stage-4');
+
+  const frames = [];
+  let loadedCount = 0;
+  let currentFrameIndex = 0;
+  let animationFrameId = null;
+
+  function pad(num, size) {
+    let s = num + "";
+    while (s.length < size) s = "0" + s;
+    return s;
+  }
+
+  // Preload images asynchronously
+  for (let i = 1; i <= TOTAL_FRAMES; i++) {
+    const img = new Image();
+    const frameNum = pad(i, 3);
+    const primarySrc = `public/images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+    const fallbackSrc = `images sequence -jpg/ezgif-frame-${frameNum}.jpg`;
+
+    img.src = primarySrc;
+    img.onload = () => {
+      loadedCount++;
+      const pct = Math.min(100, Math.floor((loadedCount / TOTAL_FRAMES) * 100));
+      if (loaderFill) loaderFill.style.width = pct + '%';
+      if (loaderText) loaderText.textContent = `INITIALIZING TELEMETRY ENGINE... [${pct}%]`;
+      
+      // Render Frame 0 as soon as available
+      if (i === 1) {
+        renderFrame(0);
+      }
+      
+      if (loadedCount >= TOTAL_FRAMES) {
+        setTimeout(() => {
+          if (loaderEl) loaderEl.classList.add('hidden-overlay');
+        }, 200);
+      }
+    };
+    img.onerror = () => {
+      if (img.src.includes('public/')) {
+        img.src = fallbackSrc;
+      } else {
+        loadedCount++;
+      }
+    };
+    frames.push(img);
+  }
+
+  // Responsive object-fit: cover drawing
+  function renderFrame(index) {
+    const img = frames[index];
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    
+    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+    }
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    const cWidth = rect.width;
+    const cHeight = rect.height;
+    const iWidth = img.naturalWidth;
+    const iHeight = img.naturalHeight;
+
+    const scale = Math.max(cWidth / iWidth, cHeight / iHeight);
+    const x = (cWidth - iWidth * scale) / 2;
+    const y = (cHeight - iHeight * scale) / 2;
+
+    ctx.clearRect(0, 0, cWidth, cHeight);
+    ctx.drawImage(img, x, y, iWidth * scale, iHeight * scale);
+    ctx.restore();
+  }
+
+  // Scroll listener & threshold mapping
+  function updateScroll() {
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const scrollableDistance = container.offsetHeight - window.innerHeight;
+    
+    if (scrollableDistance <= 0) return;
+
+    // Calculate progress 0 to 1
+    const rawProgress = (-rect.top) / scrollableDistance;
+    const progress = Math.max(0, Math.min(1, rawProgress));
+
+    const targetFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+    
+    if (targetFrame !== currentFrameIndex) {
+      currentFrameIndex = targetFrame;
+      renderFrame(currentFrameIndex);
+      if (frameTextEl) {
+        frameTextEl.textContent = `FRAME ${pad(currentFrameIndex + 1, 3)} / 192 • TELEMETRY ENGINE`;
+      }
+    }
+
+    // Stage threshold transitions (0-191 total frames)
+    if (stage1) stage1.classList.toggle('stage-active', currentFrameIndex <= 50);
+    if (stage2) stage2.classList.toggle('stage-active', currentFrameIndex > 50 && currentFrameIndex <= 110);
+    if (stage3) stage3.classList.toggle('stage-active', currentFrameIndex > 110 && currentFrameIndex <= 160);
+    if (stage4) stage4.classList.toggle('stage-active', currentFrameIndex > 160);
+  }
+
+  function onScroll() {
+    if (!animationFrameId) {
+      animationFrameId = requestAnimationFrame(() => {
+        updateScroll();
+        animationFrameId = null;
+      });
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => renderFrame(currentFrameIndex), { passive: true });
+  updateScroll();
+})();
+
+// ============================================================
 // INIT
 // ============================================================
 renderTrendChart();
@@ -802,130 +941,3 @@ renderProviders();
 renderIntProvGroups();
 renderBudgets();
 renderAlerts();
-
-// ============================================================
-// CANVAS 192-FRAME SCROLL SEQUENCE PLAYER
-// ============================================================
-function initCanvasSequence() {
-  const frameCount = 192;
-  const folderPath = 'public/hero-sequence';
-  const filePrefix = 'ezgif-frame-';
-  const fileExtension = '.jpg';
-  const images = new Array(frameCount);
-  let loadedCount = 0;
-  let currentFrame = 1;
-  let rafId = null;
-
-  const canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const preloader = document.getElementById('hero-preloader');
-  const preloaderText = document.getElementById('hero-preloader-text');
-  const preloaderFill = document.getElementById('hero-preloader-fill');
-  const track = document.getElementById('canvas-hero-track');
-  const contentWrapper = document.getElementById('hero-content-wrapper');
-
-  function pad(num, size) {
-    let s = num + '';
-    while (s.length < size) s = '0' + s;
-    return s;
-  }
-
-  function drawFrame(frameIdx) {
-    if (!canvas || !ctx) return;
-    const img = images[frameIdx - 1];
-    if (!img || !img.complete || img.naturalWidth === 0) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const displayWidth = canvas.clientWidth;
-    const displayHeight = canvas.clientHeight;
-
-    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
-    }
-
-    ctx.save();
-    ctx.scale(dpr, dpr);
-
-    const imgWidth = img.naturalWidth;
-    const imgHeight = img.naturalHeight;
-    const imgAspect = imgWidth / imgHeight;
-    const canvasAspect = displayWidth / displayHeight;
-
-    let renderWidth = displayWidth;
-    let renderHeight = displayHeight;
-    let offsetX = 0;
-    let offsetY = 0;
-
-    if (canvasAspect > imgAspect) {
-      renderHeight = displayWidth / imgAspect;
-      offsetY = (displayHeight - renderHeight) / 2;
-    } else {
-      renderWidth = displayHeight * imgAspect;
-      offsetX = (displayWidth - renderWidth) / 2;
-    }
-
-    ctx.clearRect(0, 0, displayWidth, displayHeight);
-    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
-    ctx.restore();
-  }
-
-  function handleScroll() {
-    if (!track) return;
-    const rect = track.getBoundingClientRect();
-    const totalScrollable = rect.height - window.innerHeight;
-    if (totalScrollable <= 0) return;
-
-    const scrollY = -rect.top;
-    const fraction = Math.min(Math.max(scrollY / totalScrollable, 0), 1);
-
-    const targetFrame = Math.min(
-      Math.max(Math.floor(fraction * (frameCount - 1)) + 1, 1),
-      frameCount
-    );
-
-    if (targetFrame !== currentFrame) {
-      currentFrame = targetFrame;
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => drawFrame(targetFrame));
-    }
-
-    if (contentWrapper) {
-      const opacity = Math.max(1 - fraction * 1.8, 0);
-      const translateY = fraction * -80;
-      contentWrapper.style.opacity = opacity;
-      contentWrapper.style.transform = `translateY(${translateY}px)`;
-    }
-  }
-
-  // Preload frames
-  for (let i = 1; i <= frameCount; i++) {
-    const img = new Image();
-    const fn = `${filePrefix}${pad(i, 3)}${fileExtension}`;
-    img.src = `${folderPath}/${fn}`;
-
-    img.onload = img.onerror = () => {
-      loadedCount++;
-      const pct = Math.floor((loadedCount / frameCount) * 100);
-      if (preloaderText) preloaderText.textContent = `INITIALIZING TELEMETRY... [${pct}%]`;
-      if (preloaderFill) preloaderFill.style.width = `${pct}%`;
-
-      if (loadedCount === frameCount) {
-        if (preloader) {
-          preloader.style.opacity = '0';
-          setTimeout(() => { preloader.style.display = 'none'; }, 300);
-        }
-        drawFrame(currentFrame);
-      }
-    };
-
-    images[i - 1] = img;
-  }
-
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('resize', handleScroll, { passive: true });
-  handleScroll();
-}
-
-initCanvasSequence();

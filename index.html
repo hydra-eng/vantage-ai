@@ -42,27 +42,35 @@
     <button class="btn-google-auth" id="btn-login-hdr" style="padding: 8px 16px; font-size: 13px;">
       Sign In
     </button>
-  </header>  <!-- Hero Section — 350vh Scroll Track for 192-Frame HTML5 Canvas Animation -->
-  <section class="canvas-hero-track" id="canvas-hero-track">
-    <div class="canvas-hero-viewport">
-      <!-- Dark-mode Preloader Overlay -->
-      <div id="hero-preloader" class="canvas-preloader">
-        <div class="canvas-spinner"></div>
-        <span id="hero-preloader-text" class="canvas-preloader-text">INITIALIZING TELEMETRY... [0%]</span>
-        <div class="canvas-progress-bar">
-          <div id="hero-preloader-fill" class="canvas-progress-fill" style="width: 0%;"></div>
+  </header>
+
+  <!-- Canvas Hero Section — 192-frame scroll-driven telemetry engine -->
+  <section id="hero-scroll-sec" class="hero-scroll-container">
+    <div class="hero-sticky-viewport">
+      
+      <!-- Preloader overlay -->
+      <div class="hero-loading-overlay" id="hero-loader">
+        <div class="hero-loader-text" id="hero-loader-text">INITIALIZING TELEMETRY ENGINE... [0%]</div>
+        <div class="hero-loader-bar">
+          <div class="hero-loader-fill" id="hero-loader-fill"></div>
         </div>
       </div>
 
-      <!-- HTML5 Canvas Element -->
-      <canvas id="hero-canvas" class="hero-canvas"></canvas>
+      <!-- HTML5 Canvas -->
+      <canvas id="hero-canvas"></canvas>
 
-      <!-- Vignette and Gradient Overlay -->
-      <div class="canvas-hero-vignette"></div>
+      <!-- Gradient overlay for dark mode contrast -->
+      <div class="canvas-gradient-overlay"></div>
 
-      <!-- Hero Text Content Overlay -->
-      <div class="hero-content-wrapper" id="hero-content-wrapper">
-        <div class="hero-badge" style="display:inline-flex; margin-bottom:24px;">
+      <!-- Live frame counter badge -->
+      <div class="hero-frame-badge">
+        <div class="hero-frame-dot"></div>
+        <span id="hero-frame-text">FRAME 001 / 192 &bull; TELEMETRY ENGINE</span>
+      </div>
+
+      <!-- ── STAGE 1 (Frames 1 - 50): Vault & Raw API Spend ── -->
+      <div class="hero-stage stage-active" id="hero-stage-1">
+        <div class="hero-badge" style="display:inline-flex; margin-bottom:20px;">
           <span>v2.4 Released</span> &mdash; Real-time token telemetry &amp; budget caps &#10140;
         </div>
 
@@ -72,7 +80,7 @@
           Eliminate surprise API billing spikes. Monitor live token consumption across OpenAI, Gemini, Anthropic, and ElevenLabs with real-time budget guardrails.
         </p>
 
-        <div class="hero-cta-grp" style="pointer-events: auto;">
+        <div class="hero-cta-grp">
           <button class="btn-google-auth" id="btn-login" style="height:40px;padding:0 20px">
             <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -90,7 +98,6 @@
           </button>
         </div>
 
-        <!-- Stats row -->
         <div class="hero-stats-row">
           <div>
             <div class="hsr-num">15+</div>
@@ -108,15 +115,108 @@
           </div>
         </div>
 
-        <!-- Supported LLMs Marquee / Ticker -->
-        <div class="hero-marquee-row">
-          <span>OpenAI</span> • <span>Anthropic</span> • <span>Google Gemini</span> • <span>ElevenLabs</span> • <span>Meta Llama</span> • <span>Cohere</span> • <span>GitHub Copilot</span> • <span>Runway ML</span>
+        <div class="marquee-container">
+          <div class="marquee-title">Supported LLMs &amp; APIs</div>
+          <div class="marquee-track">
+            <div class="marquee-item"><span class="pm pm-text" style="width:18px;height:18px;font-size:8px">OA</span> OpenAI</div>
+            <div class="marquee-item"><span class="pm pm-text" style="width:18px;height:18px;font-size:8px">AC</span> Anthropic</div>
+            <div class="marquee-item"><span class="pm pm-text" style="width:18px;height:18px;font-size:8px">GG</span> Google Gemini</div>
+            <div class="marquee-item"><span class="pm pm-voice" style="width:18px;height:18px;font-size:8px">EL</span> ElevenLabs</div>
+            <div class="marquee-item"><span class="pm pm-text" style="width:18px;height:18px;font-size:8px">ML</span> Meta Llama</div>
+            <div class="marquee-item"><span class="pm pm-text" style="width:18px;height:18px;font-size:8px">CO</span> Cohere</div>
+            <div class="marquee-item"><span class="pm pm-code" style="width:18px;height:18px;font-size:8px">GC</span> GitHub Copilot</div>
+            <div class="marquee-item"><span class="pm pm-video" style="width:18px;height:18px;font-size:8px">RW</span> Runway ML</div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>   </div>
-    </div>
 
+      <!-- ── STAGE 2 (Frames 51 - 110): Telemetry & Light Portal ── -->
+      <div class="hero-stage" id="hero-stage-2">
+        <div class="hero-badge" style="display:inline-flex; margin-bottom:20px;">
+          <span>Telemetry Portal</span> &mdash; Real-time Token Ingestion &#10140;
+        </div>
+        <h2 class="hero-title">Per-Second Token<br>Stream Telemetry</h2>
+        <p class="hero-subtitle">
+          Continuous stream monitoring with zero payload retention. Track model token velocity, prompt vs completion ratios, and exact cost attribution in real time.
+        </p>
+
+        <div class="hero-card-grid">
+          <div class="hero-detail-card">
+            <span class="hdc-icon">⚡</span>
+            <div class="hdc-title">Live Token Tracking</div>
+            <div class="hdc-desc">Separate prompt &amp; completion token counts mapped instantly to billing units.</div>
+          </div>
+          <div class="hero-detail-card">
+            <span class="hdc-icon">🌐</span>
+            <div class="hdc-title">Multi-Provider Pipeline</div>
+            <div class="hdc-desc">Unified telemetry ingestion across OpenAI, Anthropic, Gemini &amp; ElevenLabs.</div>
+          </div>
+          <div class="hero-detail-card">
+            <span class="hdc-icon">₹</span>
+            <div class="hdc-title">₹ &amp; $ Currency Normalize</div>
+            <div class="hdc-desc">Automatic Rupee conversion for Indian enterprise GST &amp; corporate card billing.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STAGE 3 (Frames 111 - 160): Budget Caps & Infrastructure ── -->
+      <div class="hero-stage" id="hero-stage-3">
+        <div class="hero-badge" style="display:inline-flex; margin-bottom:20px;">
+          <span>Budget Guardrails</span> &mdash; Automated Hard &amp; Soft Caps &#10140;
+        </div>
+        <h2 class="hero-title">Automated Budget<br>Guardrails &amp; Limits</h2>
+        <p class="hero-subtitle">
+          Prevent runaway billing overruns before they hit your enterprise card. Set granular team thresholds, automated rate limits, and instant breach notifications.
+        </p>
+
+        <div class="hero-card-grid">
+          <div class="hero-detail-card">
+            <span class="hdc-icon">🛡️</span>
+            <div class="hdc-title">Hard &amp; Soft Caps</div>
+            <div class="hdc-desc">Automated limit enforcement for Engineering, Marketing, and Data teams.</div>
+          </div>
+          <div class="hero-detail-card">
+            <span class="hdc-icon">🔔</span>
+            <div class="hdc-title">80% Slack &amp; Email Alerts</div>
+            <div class="hdc-desc">Instant breach notifications sent to team leads before budget exhaustion.</div>
+          </div>
+          <div class="hero-detail-card">
+            <span class="hdc-icon">👥</span>
+            <div class="hdc-title">Department Seat Auditing</div>
+            <div class="hdc-desc">Uncover inactive developer seats and revoke unused credentials with a single click.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STAGE 4 (Frames 161 - 192): Security & Enterprise Vault ── -->
+      <div class="hero-stage" id="hero-stage-4">
+        <div class="hero-badge" style="display:inline-flex; margin-bottom:20px;">
+          <span>Enterprise Security</span> &mdash; SOC2 &amp; Zero Retention &#10140;
+        </div>
+        <h2 class="hero-title">SOC2 &amp; Zero-Retention<br>Security Architecture</h2>
+        <p class="hero-subtitle">
+          API keys remain encrypted in 256-bit AES vaults. Telemetry mode reads metadata only &mdash; zero prompt content or user payload is ever stored.
+        </p>
+
+        <div class="hero-stats-row" style="margin-top: 10px;">
+          <div>
+            <div class="hsr-num" style="color: #38bdf8;">15+</div>
+            <div class="hsr-lbl">AI Providers</div>
+          </div>
+          <div class="hsr-divider"></div>
+          <div>
+            <div class="hsr-num" style="color: #38bdf8;">45%</div>
+            <div class="hsr-lbl">Avg Spend Reduced</div>
+          </div>
+          <div class="hsr-divider"></div>
+          <div>
+            <div class="hsr-num" style="color: #38bdf8;">₹17.8L</div>
+            <div class="hsr-lbl">Monthly Managed</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </section>
 
   <!-- Bento Grid Section -->
