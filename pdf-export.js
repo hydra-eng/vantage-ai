@@ -2,8 +2,9 @@
  * Vantage AI — 3-Sheet Corporate Billing Packet
  * All pages: Portrait A4 (210 × 297 mm) — print-ready
  *
- * Color palette: Classic Corporate Black, White & Warm Vintage Espresso/Brown.
+ * Color palette: High-Contrast Pure Corporate Black & White.
  * Designed for real-life corporate billing, tax compliance & C-suite submission.
+ * Zero text overlapping, generous line spacing, and native doc.save() download.
  *
  * Requires jsPDF 2.5 + jspdf-autotable 3.8 (loaded in <head> before this file).
  */
@@ -28,40 +29,40 @@ const DDATE = '15 August 2026';
 const GST   = 0.18;
 
 /* ═══════════════════════════════════════════════════════════
-   CLASSIC BLACK, WHITE & VINTAGE CORPORATE BROWN PALETTE
+   PURE BLACK & WHITE CORPORATE PALETTE
 ═══════════════════════════════════════════════════════════ */
 const P = {
-  /* Page structure — Classic Black, White & Vintage Warm Brown */
-  headerBg:   [28,  24,  22],   // Deep Espresso Black (#1C1816)
-  headerSub:  [56,  48,  44],   // Warm Charcoal Brown
-  accent:     [107, 76,  59],   // Classic Warm Corporate Brown (#6B4C3B)
-  accentWarm: [140, 100, 75],   // Warm Sepia Saddle Brown
-  white:      [255, 255, 255],
-  black:      [17,  17,  17],
+  /* Page structure — Pure Corporate Black & White */
+  headerBg:   [0,   0,   0],    // Solid Black Header Band (#000000)
+  headerSub:  [40,  40,  40],   // Dark Charcoal Subtext
+  accent:     [0,   0,   0],    // Solid Black Accent Stripe
+  accentWarm: [60,  60,  60],   // Dark Gray Accent
+  white:      [255, 255, 255],  // Crisp White
+  black:      [0,   0,   0],    // Solid Black
 
   /* Typography */
-  ink:        [20,  20,  20],   // Deep Crisp Charcoal
-  subtext:    [85,  75,  70],   // Warm Neutral Subtext
-  caption:    [120, 110, 105],  // Fine print
+  ink:        [0,   0,   0],    // Pure High-Contrast Black Ink
+  subtext:    [70,  70,  70],   // Crisp Dark Gray Subtext
+  caption:    [110, 110, 110],  // Fine print Gray
 
   /* Table */
-  thBg:       [43,  35,  29],   // Dark Espresso Table Header
-  thText:     [255, 255, 255],
-  rowAlt:     [250, 248, 245],  // Soft Warm Cream Tint
-  rowHover:   [244, 240, 235],
-  border:     [213, 206, 199],  // Hairline Warm Sepia Border
-  sectionBg:  [245, 242, 237],  // Soft Linen Parchment Section Header
+  thBg:       [0,   0,   0],    // Solid Black Table Header
+  thText:     [255, 255, 255],  // Crisp White Header Text
+  rowAlt:     [248, 248, 248],  // Minimal Crisp Light Gray Row Tint
+  rowHover:   [240, 240, 240],
+  border:     [200, 200, 200],  // Crisp Light Gray Hairline Border
+  sectionBg:  [240, 240, 240],  // Soft Gray Section Header Strip
 
-  /* Status badges */
-  green:      [45,  100, 50],
-  greenBg:    [235, 246, 236],
-  amber:      [160, 90,  15],
-  amberBg:    [254, 243, 225],
-  red:        [175, 30,  30],
-  redBg:      [254, 230, 230],
+  /* Status badges — Clean Black & White Monochrome */
+  green:      [0,   0,   0],
+  greenBg:    [240, 240, 240],
+  amber:      [0,   0,   0],
+  amberBg:    [240, 240, 240],
+  red:        [0,   0,   0],
+  redBg:      [240, 240, 240],
 
   /* Footer */
-  footerBg:   [28,  24,  22],
+  footerBg:   [0,   0,   0],
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -131,7 +132,7 @@ function tokF(t) {
   return t >= 1000000 ? (t/1000000).toFixed(2)+'M' : t >= 1000 ? (t/1000).toFixed(1)+'K' : String(t);
 }
 function pLabel(p) { return p >= 100 ? 'HARD CAP' : p >= 80 ? 'WARNING' : 'NORMAL'; }
-function pColor(p) { return p >= 100 ? P.red : p >= 80 ? P.amber : P.green; }
+function pColor(p) { return P.ink; } // Pure Black & White Monochrome
 
 /* ═══════════════════════════════════════════════════════════
    COMMON DRAWING PRIMITIVES
@@ -139,12 +140,12 @@ function pColor(p) { return p >= 100 ? P.red : p >= 80 ? P.amber : P.green; }
 
 /** Draw the standard page header band. Returns y after header. */
 function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
-  // Main Espresso Black header band
+  // Main Pure Black header band
   doc.setFillColor(...P.headerBg);
   doc.rect(0, 0, W, 26, 'F');
 
-  // Left accent stripe — Classic Warm Brown
-  doc.setFillColor(...P.accent);
+  // Left accent stripe — Pure Black / Charcoal
+  doc.setFillColor(60, 60, 60);
   doc.rect(0, 0, 3.5, 26, 'F');
 
   // Title
@@ -156,18 +157,18 @@ function drawHeader(doc, W, ML, MR, title, subtitle, opts, pgLabel) {
   // Subtitle
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  doc.setTextColor(215, 205, 195);
+  doc.setTextColor(215, 215, 215);
   doc.text(subtitle, ML + 4, 18.5);
 
   // Right meta
   doc.setFontSize(6.5);
-  doc.setTextColor(215, 205, 195);
+  doc.setTextColor(215, 215, 215);
   doc.text(`Invoice: ${INV}`, W - MR, 9, { align: 'right' });
   doc.text(`Period: ${opts.period}   |   Entity: ${opts.workspace}`, W - MR, 14.5, { align: 'right' });
   doc.text(pgLabel, W - MR, 20, { align: 'right' });
 
-  // Thin Warm Brown accent rule under header
-  doc.setFillColor(...P.accent);
+  // Thin Black accent rule under header
+  doc.setFillColor(...P.headerBg);
   doc.rect(0, 26, W, 1.2, 'F');
 
   return 31;
@@ -180,9 +181,11 @@ function sLabel(doc, ML, BW, y, text) {
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.2);
   doc.rect(ML, y, BW, 5.5);
-  // Left accent mark — Warm Brown
-  doc.setFillColor(...P.accent);
+
+  // Left accent mark — Solid Black
+  doc.setFillColor(...P.headerBg);
   doc.rect(ML, y, 2.5, 5.5, 'F');
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(...P.headerBg);
@@ -263,7 +266,7 @@ function buildSheet1(doc, opts) {
   const boxH1 = 28;
 
   // Box 1: Billed To
-  doc.setFillColor(253, 252, 250);
+  doc.setFillColor(252, 252, 252);
   doc.rect(ML, y, hBW, boxH1, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
@@ -292,7 +295,7 @@ function buildSheet1(doc, opts) {
 
   // Box 2: Invoice & Tax Reference
   const rx = ML + hBW + 4;
-  doc.setFillColor(253, 252, 250);
+  doc.setFillColor(252, 252, 252);
   doc.rect(rx, y, hBW, boxH1, 'F');
   doc.setDrawColor(...P.border);
   doc.rect(rx, y, hBW, boxH1);
@@ -339,8 +342,8 @@ function buildSheet1(doc, opts) {
     { lbl:'TAXABLE VALUE',  val: inrL(totalNet),    note:'Excl. GST',            clr: P.headerBg },
     { lbl:'CGST (9%)',      val: inrL(totalCGST),   note:'Central Tax',          clr: P.headerSub },
     { lbl:'SGST (9%)',      val: inrL(totalSGST),   note:'State Tax',            clr: P.headerSub },
-    { lbl:'TOTAL PAYABLE',  val: inrL(totalGross),  note:'Incl. GST',            clr: P.accent },
-    { lbl:'BUDGET HEALTH',  val: budgPct + '%',     note: pLabel(budgPct),       clr: pColor(budgPct) },
+    { lbl:'TOTAL PAYABLE',  val: inrL(totalGross),  note:'Incl. GST',            clr: P.headerBg },
+    { lbl:'BUDGET HEALTH',  val: budgPct + '%',     note: pLabel(budgPct),       clr: P.headerBg },
   ];
 
   const kW = (BW - 4 * 2) / 5;
@@ -417,7 +420,7 @@ function buildSheet1(doc, opts) {
       if (d.section !== 'body') return;
       const p = PROVIDERS[d.row.index]; if (!p) return;
       if (d.column.index === 8 || d.column.index === 9) {
-        d.cell.styles.textColor = pColor(p.pct);
+        d.cell.styles.textColor = P.ink;
         d.cell.styles.fontStyle = 'bold';
       }
     },
@@ -429,8 +432,8 @@ function buildSheet1(doc, opts) {
       { content: inr(totalSGST), styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
       { content: inr(totalGross),styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
       { content: inr(totalBudg), styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
-      { content: budgPct + '%',  styles: { halign: 'center', fontStyle: 'bold', textColor: pColor(budgPct) } },
-      { content: pLabel(budgPct),styles: { halign: 'center', fontStyle: 'bold', textColor: pColor(budgPct) } },
+      { content: budgPct + '%',  styles: { halign: 'center', fontStyle: 'bold', textColor: P.white } },
+      { content: pLabel(budgPct),styles: { halign: 'center', fontStyle: 'bold', textColor: P.white } },
     ]],
     footStyles, showFoot: 'lastPage',
   });
@@ -442,7 +445,7 @@ function buildSheet1(doc, opts) {
   const boxH2 = 31, halfW = (BW - 4) / 2;
 
   // Left: Tax breakdown
-  doc.setFillColor(253, 252, 250);
+  doc.setFillColor(252, 252, 252);
   doc.rect(ML, y, halfW, boxH2, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
@@ -476,7 +479,7 @@ function buildSheet1(doc, opts) {
 
   // Right: Bank details
   const rxBank = ML + halfW + 4;
-  doc.setFillColor(253, 252, 250);
+  doc.setFillColor(252, 252, 252);
   doc.rect(rxBank, y, halfW, boxH2, 'F');
   doc.setDrawColor(...P.border);
   doc.rect(rxBank, y, halfW, boxH2);
@@ -514,7 +517,7 @@ function buildSheet1(doc, opts) {
   ];
   sigs.forEach((s, i) => {
     const sx = ML + i * (sigW + 4);
-    doc.setFillColor(253, 252, 250);
+    doc.setFillColor(252, 252, 252);
     doc.rect(sx, y, sigW, sigH, 'F');
     doc.setDrawColor(...P.border);
     doc.setLineWidth(0.3);
@@ -604,7 +607,7 @@ function buildSheet2(doc, opts) {
       if (d.section !== 'body') return;
       const dep = DEPTS[d.row.index]; if (!dep) return;
       if (d.column.index === 9 || d.column.index === 10) {
-        d.cell.styles.textColor = pColor(dep.pct);
+        d.cell.styles.textColor = P.ink;
         d.cell.styles.fontStyle = 'bold';
       }
     },
@@ -617,8 +620,8 @@ function buildSheet2(doc, opts) {
       { content: inr(Math.round(totDN*0.09)), styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
       { content: inr(Math.round(totDN*1.18)), styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
       { content: inr(totDB),   styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
-      { content: totDPct + '%',styles: { halign: 'center', fontStyle: 'bold', textColor: pColor(totDPct) } },
-      { content: pLabel(totDPct),styles:{ halign: 'center', fontStyle: 'bold', textColor: pColor(totDPct) } },
+      { content: totDPct + '%',styles: { halign: 'center', fontStyle: 'bold', textColor: P.white } },
+      { content: pLabel(totDPct),styles:{ halign: 'center', fontStyle: 'bold', textColor: P.white } },
     ]],
     footStyles, showFoot: 'lastPage',
   });
@@ -654,7 +657,7 @@ function buildSheet2(doc, opts) {
         { content: '₹'+gross.toFixed(4),styles: { font: 'courier', halign: 'right', fontStyle: 'bold' } },
         { content: CO.sac,              styles: { halign: 'center', textColor: P.headerBg, fontStyle: 'bold' } },
         { content: '18%',               styles: { halign: 'center' } },
-        { content: 'COMPLIANT',         styles: { halign: 'center', textColor: P.green, fontStyle: 'bold' } },
+        { content: 'COMPLIANT',         styles: { halign: 'center', textColor: P.ink, fontStyle: 'bold' } },
       ];
     }),
     headStyles, bodyStyles, alternateRowStyles,
@@ -670,9 +673,9 @@ function buildSheet2(doc, opts) {
 
   /* ── GOVERNANCE RULES BOX ────────────────────── */
   y = sLabel(doc, ML, BW, y, 'SECTION 3  —  AUTOMATED AI GOVERNANCE & ENFORCEMENT POLICY');
-  const boxH3 = 27;
+  const boxH3 = 29;
 
-  doc.setFillColor(253, 252, 250);
+  doc.setFillColor(252, 252, 252);
   doc.rect(ML, y, BW, boxH3, 'F');
   doc.setDrawColor(...P.border);
   doc.setLineWidth(0.3);
@@ -680,20 +683,20 @@ function buildSheet2(doc, opts) {
 
   const halfBW = (BW - 5) / 2;
   const rules = [
-    { clr: P.green, hd: 'NORMAL  (< 80% Budget Used)',    body: 'Full access. Primary model endpoints. No restrictions or throttling applied.' },
-    { clr: P.amber, hd: 'WARNING  (≥ 80% Budget Used)',   body: 'Auto-fallback to cost-tier models (e.g. Flash, Haiku). Finance alert dispatched.' },
-    { clr: P.red,   hd: 'HARD CAP  (≥ 100% Budget Used)', body: 'API key suspended immediately at proxy. Requests blocked until next billing cycle.' },
+    { clr: P.ink, hd: 'NORMAL  (< 80% Budget Used)',    body: 'Full access. Primary model endpoints. No restrictions or throttling applied.' },
+    { clr: P.ink, hd: 'WARNING  (≥ 80% Budget Used)',   body: 'Auto-fallback to cost-tier models (e.g. Flash, Haiku). Finance alert dispatched.' },
+    { clr: P.ink, hd: 'HARD CAP  (≥ 100% Budget Used)', body: 'API key suspended immediately at proxy. Requests blocked until next billing cycle.' },
   ];
   doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
   doc.text('DYNAMIC ROUTING POLICIES:', ML + 4, y + 5.5);
   rules.forEach((r, i) => {
-    const ry = y + 9.5 + i * 5.5;
-    doc.setFillColor(...r.clr);
+    const ry = y + 9.5 + i * 5.8;
+    doc.setFillColor(...P.headerBg);
     doc.rect(ML + 4, ry - 2.8, 2.5, 3.2, 'F');
-    doc.setFont('helvetica', 'bold');   doc.setFontSize(6.2); doc.setTextColor(...r.clr);
+    doc.setFont('helvetica', 'bold');   doc.setFontSize(6.2); doc.setTextColor(...P.ink);
     doc.text(r.hd, ML + 9, ry);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...P.subtext);
-    doc.text(r.body, ML + 9, ry + 3);
+    doc.text(r.body, ML + 9, ry + 3.2);
   });
 
   const loopRules = [
@@ -702,11 +705,11 @@ function buildSheet2(doc, opts) {
     'Recursive tool-call depth exceeds 5 levels in agentic pipelines',
   ];
   const rx2 = ML + halfBW + 5;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.red);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.ink);
   doc.text('AGENTIC LOOP DETECTION TRIGGERS:', rx2, y + 5.5);
   loopRules.forEach((l, i) => {
-    const ry = y + 9.5 + i * 5.5;
-    doc.setFillColor(...P.red);
+    const ry = y + 9.5 + i * 5.8;
+    doc.setFillColor(...P.headerBg);
     doc.rect(rx2, ry - 2.8, 2.5, 3.2, 'F');
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...P.ink);
     doc.text(l, rx2 + 5, ry);
@@ -754,7 +757,7 @@ function buildSheet3(doc, opts) {
       const total = r.net + gst;
       return [
         { content: r.ts,   styles: { font: 'courier', fontSize: 5.8, textColor: P.subtext } },
-        { content: r.eid,  styles: { font: 'courier', fontSize: 6.0, textColor: P.accent  } },
+        { content: r.eid,  styles: { font: 'courier', fontSize: 6.0, textColor: P.ink  } },
         { content: r.dept, styles: { fontSize: 6.2 } },
         { content: r.prov, styles: { fontSize: 6.2 } },
         { content: r.model,styles: { font: 'courier', fontSize: 5.8 } },
@@ -780,16 +783,16 @@ function buildSheet3(doc, opts) {
       if (d.section !== 'body') return;
       const row = TELEM[d.row.index]; if (!row) return;
       if (d.column.index === 10) {
-        d.cell.styles.textColor = pColor(row.pct);
+        d.cell.styles.textColor = P.ink;
         d.cell.styles.fontStyle = 'bold';
       }
       if (d.column.index === 11 && row.loop) {
-        d.cell.styles.textColor  = P.red;
+        d.cell.styles.textColor  = P.white;
         d.cell.styles.fontStyle  = 'bold';
-        d.cell.styles.fillColor  = P.redBg;
+        d.cell.styles.fillColor  = P.headerBg;
       }
       if (d.column.index === 11 && !row.loop) {
-        d.cell.styles.textColor = P.green;
+        d.cell.styles.textColor = P.ink;
         d.cell.styles.fontStyle = 'bold';
       }
     },
@@ -798,83 +801,56 @@ function buildSheet3(doc, opts) {
       { content: TELEM.reduce((s,r)=>s+r.pt,0).toLocaleString('en-IN'),  styles: { font:'courier', halign:'right', fontStyle:'bold' } },
       { content: TELEM.reduce((s,r)=>s+r.ct,0).toLocaleString('en-IN'),  styles: { font:'courier', halign:'right', fontStyle:'bold' } },
       { content: inr(TELEM.reduce((s,r)=>s+r.net,0)),                    styles: { font:'courier', halign:'right', fontStyle:'bold' } },
-      { content: inr(Math.round(TELEM.reduce((s,r)=>s+r.net,0)*GST)),    styles: { font:'courier', halign:'right', fontStyle:'bold' } },
-      { content: inr(Math.round(TELEM.reduce((s,r)=>s+r.net,0)*1.18)),   styles: { font:'courier', halign:'right', fontStyle:'bold' } },
-      { content: '' },
-      { content: `${TELEM.filter(r=>r.loop).length} LOOP`, styles: { halign:'center', fontStyle:'bold', textColor: P.red } },
+      { content: inr(TELEM.reduce((s,r)=>s+Math.round(r.net*GST),0)),     styles: { font:'courier', halign:'right', fontStyle:'bold' } },
+      { content: inr(TELEM.reduce((s,r)=>s+Math.round(r.net*(1+GST)),0)), styles: { font:'courier', halign:'right', fontStyle:'bold' } },
+      { content: '—', styles: { halign:'center' } },
+      { content: TELEM.filter(r=>r.loop).length + ' LOOPS', styles: { halign:'center', fontStyle:'bold', textColor: P.white } },
     ]],
-    footStyles, showFoot: 'lastPage', showHead: 'everyPage',
-    rowPageBreak: 'avoid',
-    didDrawPage() {
-      drawFooter(doc, W, ML, MR, 'Sheet 3 of 3');
-    },
+    footStyles, showFoot: 'lastPage',
   });
 
-  y = doc.lastAutoTable.finalY + 4.5;
-
-  /* ── AUDIT CERTIFICATION BOX ─────────────────── */
-  y = sLabel(doc, ML, BW, y, 'SECTION 2  —  TELEMETRY AUDIT CERTIFICATION & COMPLIANCE SIGN-OFF');
-
-  const certH = Math.min(27, 280 - y);
-  if (certH > 10) {
-    doc.setFillColor(253, 252, 250);
-    doc.rect(ML, y, BW, certH, 'F');
-    doc.setDrawColor(...P.border);
-    doc.setLineWidth(0.3);
-    doc.rect(ML, y, BW, certH);
-
-    const halfCW = (BW - 5) / 2;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
-    doc.text('AUDIT CERTIFICATION:', ML + 4, y + 5.5);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3); doc.setTextColor(...P.subtext);
-    doc.text('This 3-sheet billing packet is generated by Vantage AI and contains verified', ML + 4, y + 10.5);
-    doc.text('raw telemetry sourced from live API provider logs. IGST @ 18% is computed', ML + 4, y + 14.5);
-    doc.text(`under SAC ${CO.sac}. All amounts are in Indian Rupees (INR).`, ML + 4, y + 18.5);
-
-    const rx3 = ML + halfCW + 5;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...P.headerBg);
-    doc.text('INTERNAL CONTROL AUDITOR:', rx3, y + 5.5);
-    doc.setDrawColor(...P.subtext); doc.setLineWidth(0.35);
-    doc.line(rx3, y + 17, rx3 + halfCW - 2, y + 17);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...P.caption);
-    doc.text('Signature & Official Stamp            Date: ___/___/______', rx3, y + 21);
-  }
+  drawFooter(doc, W, ML, MR, 'Sheet 3 of 3');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PROGRESS BAR HELPERS
+   MAIN PDF GENERATION CONTROLLER & EXPORT FUNCTION
 ═══════════════════════════════════════════════════════════ */
-function showProgress() {
-  const b = document.getElementById('pdf-progress-bar');
-  if (!b) return;
-  b.style.opacity = '1'; b.style.transition = 'none'; b.style.width = '0%';
-  requestAnimationFrame(() => { b.style.transition = 'width 2s ease'; b.style.width = '80%'; });
-}
-function finishProgress() {
-  const b = document.getElementById('pdf-progress-bar');
-  if (!b) return;
-  b.style.transition = 'width 0.2s'; b.style.width = '100%';
-  setTimeout(() => { b.style.opacity = '0'; b.style.width = '0%'; }, 400);
-}
+window.generateVantagePDF = function generateVantagePDF(customOpts) {
+  const opts = Object.assign({
+    period: 'July 2026',
+    workspace: 'TechCorp India Pvt. Ltd.',
+    sigName: 'Aditya Sharma',
+    includeAppendix: true,
+  }, customOpts || {});
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN ENTRY POINT
-   jsPDF is loaded in <head> before this script — always available.
-═══════════════════════════════════════════════════════════ */
-window.exportVantagePDF = async function(options) {
-  const opts = {
-    period:          (options && options.period)          || 'July 2026',
-    workspace:       (options && options.workspace)       || CO.name,
-    sigName:         (options && options.sigName)         || '',
-    includeAppendix: (options && options.includeAppendix) !== false,
-  };
-
-  /* jsPDF UMD exposes window.jspdf.jsPDF */
-  var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  var JsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
   if (!JsPDF) {
-    window.showToast && window.showToast('jsPDF library not found — check your connection and refresh.', 'error');
-    console.error('[PDF] window.jspdf:', window.jspdf, '| window.jsPDF:', window.jsPDF);
+    alert('PDF library (jsPDF) is not loaded yet. Please refresh the page and try again.');
     return;
+  }
+
+  function showProgress() {
+    var p = document.getElementById('pdf-progress-overlay');
+    if (!p) {
+      p = document.createElement('div');
+      p.id = 'pdf-progress-overlay';
+      p.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:sans-serif;font-size:14px;backdrop-filter:blur(3px);';
+      p.innerHTML = '<div style="margin-bottom:12px;font-weight:600">Generating Pure Black & White Executive PDF Report…</div><div style="width:200px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden"><div id="pdf-prog-bar" style="width:0%;height:100%;background:#ffffff;transition:width 0.2s"></div></div>';
+      document.body.appendChild(p);
+    }
+    p.style.display = 'flex';
+    var bar = document.getElementById('pdf-prog-bar');
+    if (bar) bar.style.width = '30%';
+    setTimeout(function() { if (bar) bar.style.width = '80%'; }, 200);
+  }
+
+  function finishProgress() {
+    var bar = document.getElementById('pdf-prog-bar');
+    if (bar) bar.style.width = '100%';
+    setTimeout(function() {
+      var p = document.getElementById('pdf-progress-overlay');
+      if (p) p.style.display = 'none';
+    }, 400);
   }
 
   document.querySelectorAll('[data-pdf-trigger]').forEach(function(b) {
@@ -900,34 +876,21 @@ window.exportVantagePDF = async function(options) {
     }
 
     var fn = 'Vantage_Billing_Packet_' + opts.period.replace(/\s+/g, '_') + '.pdf';
-    var blob = doc.output('blob');
-    var blobUrl = URL.createObjectURL(blob);
 
-    // 1. Direct anchor download link
-    var link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = fn;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(function() {
-      if (link.parentNode) link.parentNode.removeChild(link);
-    }, 1000);
-
-    // 2. Open PDF preview in new tab if popups allowed
-    try {
-      window.open(blobUrl, '_blank');
-    } catch(winErr) {
-      console.log('[PDF] New window open suppressed by browser:', winErr);
-    }
+    // Execute direct native browser file save!
+    doc.save(fn);
 
     finishProgress();
-    window.showToast && window.showToast('Downloaded \u2014 ' + fn, 'success');
+    if (window.showToast) {
+      window.showToast('Downloaded \u2014 ' + fn, 'success');
+    }
 
   } catch(err) {
     console.error('[PDF Export Error]', err);
     finishProgress();
-    window.showToast && window.showToast('PDF error: ' + err.message, 'error');
+    if (window.showToast) {
+      window.showToast('PDF error: ' + err.message, 'error');
+    }
   } finally {
     if (si) si.style.visibility = '';
     if (sc) sc.style.visibility = '';
